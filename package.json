@@ -1,0 +1,31 @@
+{
+  "name": "stateful-osc-relay",
+  "version": "0.1.0",
+  "author": "Peter Körner <peter@mazdermind.de>",
+  "description": "a stateful stateful-osc-relay",
+  "contributors": [ ],
+  "bin": {
+    "http-server": "./stateful-osc-relay-runner"
+  },
+  "scripts": {
+    "start": "node ./stateful-osc-relay.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MaZderMind/stateful-osc-relay.git"
+  },
+  "keywords": [
+    "osc",
+    "client",
+    "server",
+    "state"
+  ],
+  "dependencies" : {
+    "osc-min": "~0.0.9",
+    "mdns2": "2.1.x"
+  },
+  "license": "FreeBSD",
+  "engines": {
+    "node": ">=0.10"
+  }
+}
