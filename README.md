@@ -1,6 +1,6 @@
 TODO:
- - State timeout
+ x State timeout
  - State broadcast
  - State persistence
  x Client Timeout
- - Cleanups ;)
+ x Cleanups ;)

@@ -1,6 +1,6 @@
 module.exports = {
 	// if one device only once sends a rare value, that value will be broadcasted repeatedly in the above mentioned interval. The number of seconds configured below set's a timeout after which a rare value is removed from the relays internal state, if no other occurence of that value reaches the relay in time.
-	valueStoreTimeout: 10,//60*60, // one hour
+	valueStoreTimeout: 60*60, // one hour
 
 	// the port to which your devices should send messages
 	receivePort: 10001,

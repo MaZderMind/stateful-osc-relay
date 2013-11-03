@@ -192,7 +192,7 @@ function startGuestBrowser()
 		{
 			var buffer = osc.toBuffer({
 				address: address,
-				args: state[address]
+				args: state[address].args
 			});
 
 			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
@@ -250,8 +250,19 @@ function startRelay()
 		if(filterResult !== false)
 			return console.log('   filtered -> ', filterResult);
 
+		// clear previous timeouts
+		if(state[message.address])
+			clearTimeout(state[message.address].timeout);
+
 		// save the message and its arguments in our internal state array
-		state[message.address] = message.args;
+		state[message.address] = {
+			args: message.args,
+			timeout: setTimeout(function()
+			{
+				console.log('removing message', message.address, 'from internal state');
+				delete state[message.address];
+			}, config.valueStoreTimeout * 1000)
+		}
 
 		// forward message to one of the guests
 		function forward(name, guest)
