@@ -18,5 +18,18 @@ The relay has various timeouts directed at not flooding your network. First of a
 ## About Filters
 Some Messages are nonsense. TouchOSC regularly submits a ``/ping``-Message and also transmits a ```/page/[0-9]+``` message each time you switch to another page in the gui. Such messages can be filtered via filter-rules in the configuration.
 
-## About me
-I'm Peter Körner from Germany. If you have any questions just ask at peter@mazdermind.de.
+## Getting & Running it
+Install [NodeJS](http://nodejs.org/)
+Run the following command on the Terminal:
+```
+git clone https://github.com/MaZderMind/stateful-osc-relay.git
+cd stateful-osc-relay
+npm install
+node stateful-osc-relay.js
+```
+
+Now the relay should be up and announce itsself via Zeroconf.
+
+
+## Contact
+If you have any questions just ask at peter@mazdermind.de.
