@@ -1,4 +1,4 @@
-# Stateful OpenSoundControl (OSC) Relay =
+# Stateful OpenSoundControl (OSC) Relay
 
 ## About OpenSoundControl
 OpenSoundControl (OSC) is a amall and lightweight remote control protocol. I'ts somehow the successor of midi. It consists of messages one device sends to another. For example an iPad with the [TouchOSC](http://hexler.net/software/touchosc) Software can control an [https://www.ableton.com/de/live/ AbletonLive] on your Computer or directly Controle [some Hardware](http://wifimidi.com/). That all works out fine as long as only one Device is controlling one other, but if you have multiple Receivers and multiple Devices you'll need a relay like [Osculator](http://www.osculator.net/).
