@@ -186,17 +186,9 @@ function startGuestBrowser()
 		console.log('guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
 
 		// brief the new guest with our internal state
-		// TODO: evaluate the use of a combined osc message
 		console.log('  briefing new guest with '+Object.keys(state).length+' values')
-		for(address in state)
-		{
-			var buffer = osc.toBuffer({
-				address: address,
-				args: state[address].args
-			});
-
-			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
-		};
+		var buffer = generateBundleBuffer();
+		esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 	});
 	
 	// on service down
@@ -299,6 +291,26 @@ function startRelay()
 		for(name in guests)
 			forward(name, guests[name]);
 	});
+
+	// periodic retransmit/broadcast
+	setInterval(function() {
+		console.log('broadcasting complete internal state to all devices');
+		var buffer = generateBundleBuffer();
+
+		// iterare static guests
+		for(name in config.staticGuests)
+		{
+			var guest = config.staticGuests[name];
+			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+		}
+
+		// iterare dynmaic guests
+		for(name in guests)
+		{
+			var guest = guests[name];
+			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+		}
+	}, config.broadcastInterval*1000);
 }
 
 
@@ -338,4 +350,25 @@ function isMessageFiltered(messageAdress)
 
 	// no match
 	return false;
+}
+
+function generateBundleBuffer()
+{
+	var elements =  []
+	for(address in state)
+	{
+		elements.push({
+			oscType: "message",
+			address: address,
+			args: state[address].args
+		})
+
+	};
+
+	var buffer = osc.toBuffer({
+		oscType: "bundle",
+		elements: elements
+	});
+
+	return buffer;
 }
