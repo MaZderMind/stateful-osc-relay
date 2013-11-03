@@ -21,6 +21,9 @@ module.exports = {
 
 	messageFilter: {
 		// filter our messages that just consists of /[0-9] which are usually TouchOSC page change messages
-		pageSwap: /^\/[0-9]+$/i
+		pageSwap: /^\/[0-9]+$/i,
+
+		// filter out ping messages
+		ping: '/ping'
 	}
 }
