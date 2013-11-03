@@ -306,10 +306,10 @@ function startRelay()
 	});
 
 	// periodic retransmit/broadcast
-	if(config.broadcastInterval > 0)
+	if(config.broadcastInterval > 0 && config.staticGuests.length > 0)
 	{
 		setInterval(function() {
-			console.log('broadcasting complete internal state to all devices');
+			console.log('broadcasting complete internal state to static guests');
 			var buffer = generateBundleBuffer();
 
 			// iterare static guests
@@ -319,12 +319,6 @@ function startRelay()
 				esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 			}
 
-			// iterare dynmaic guests
-			for(name in guests)
-			{
-				var guest = guests[name];
-				esock.send(buffer, 0, buffer.length, guest.port, guest.address);
-			}
 		}, config.broadcastInterval*1000);
 	}
 }
