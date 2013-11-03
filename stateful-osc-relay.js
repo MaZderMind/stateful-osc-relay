@@ -150,14 +150,17 @@ function startGuestBrowser()
 			// update guest timeout
 			var guest = guests[service.name];
 
-			clearTimeout(guest.timeout);
-			guest.timeout = setTimeout(function() {
-				// save state for a short time and delete from guest hash
-				delete guests[service.name];
+			if(config.guestTimeout > 0)
+			{
+				clearTimeout(guest.timeout);
+				guest.timeout = setTimeout(function() {
+					// save state for a short time and delete from guest hash
+					delete guests[service.name];
 
-				// print a message
-				console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
-			}, config.guestTimeout * 1000);
+					// print a message
+					console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+				}, config.guestTimeout * 1000);
+			}
 
 			// do nothing more
 			return;
@@ -166,10 +169,13 @@ function startGuestBrowser()
 		// build a new guest record
 		var guest = {
 			address: service.addresses[0],
-			port: service.port,
-			
+			port: service.port
+		}
+
+		if(config.guestTimeout > 0)
+		{
 			// timeout function
-			timeout: setTimeout(function() {
+			guest.timeout = setTimeout(function() {
 				// save state for a short time and delete from guest hash
 				var guest = guests[service.name];
 				delete guests[service.name];
@@ -177,7 +183,7 @@ function startGuestBrowser()
 				// print a message
 				console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 			}, config.guestTimeout * 1000)
-		};
+		}
 
 		// save the guest-record in the guests-hash
 		guests[service.name] = guest;
@@ -248,8 +254,12 @@ function startRelay()
 
 		// save the message and its arguments in our internal state array
 		state[message.address] = {
-			args: message.args,
-			timeout: setTimeout(function()
+			args: message.args
+		}
+
+		if(config.valueStoreTimeout > 0)
+		{
+			state.timeout = setTimeout(function()
 			{
 				console.log('removing message', message.address, 'from internal state');
 				delete state[message.address];
@@ -263,14 +273,17 @@ function startRelay()
 			if(guest.address == rinfo.address)
 			{
 				// update the timeout
-				clearTimeout(guest.timeout);
-				guest.timeout = setTimeout(function() {
-					// save state for a short time and delete from guest hash
-					delete guests[name];
+				if(config.guestTimeout > 0)
+				{
+					clearTimeout(guest.timeout);
+					guest.timeout = setTimeout(function() {
+						// save state for a short time and delete from guest hash
+						delete guests[name];
 
-					// print a message
-					console.log('guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
-				}, config.guestTimeout * 1000);
+						// print a message
+						console.log('guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+					}, config.guestTimeout * 1000);
+				}
 
 				// if the configurations restricts back-transmissions - stop here
 				if(!config.transmitBack) return;
@@ -293,24 +306,27 @@ function startRelay()
 	});
 
 	// periodic retransmit/broadcast
-	setInterval(function() {
-		console.log('broadcasting complete internal state to all devices');
-		var buffer = generateBundleBuffer();
+	if(config.broadcastInterval > 0)
+	{
+		setInterval(function() {
+			console.log('broadcasting complete internal state to all devices');
+			var buffer = generateBundleBuffer();
 
-		// iterare static guests
-		for(name in config.staticGuests)
-		{
-			var guest = config.staticGuests[name];
-			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
-		}
+			// iterare static guests
+			for(name in config.staticGuests)
+			{
+				var guest = config.staticGuests[name];
+				esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+			}
 
-		// iterare dynmaic guests
-		for(name in guests)
-		{
-			var guest = guests[name];
-			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
-		}
-	}, config.broadcastInterval*1000);
+			// iterare dynmaic guests
+			for(name in guests)
+			{
+				var guest = guests[name];
+				esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+			}
+		}, config.broadcastInterval*1000);
+	}
 }
 
 
