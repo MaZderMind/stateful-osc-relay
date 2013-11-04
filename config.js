@@ -8,6 +8,9 @@ module.exports = {
 	// the port to which your devices should send messages
 	receivePort: 10001,
 
+	// the port on which you can reach the web-ui
+	webUiPort: 8001,
+
 	// most of the time only one osc-app will run on a single ip. Therefore the relay will not transmit messsages back to the sender-ip unless you specify that flag
 	transmitBack: false,
 

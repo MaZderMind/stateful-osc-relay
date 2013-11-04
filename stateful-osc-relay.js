@@ -17,6 +17,18 @@ var
 	// the zeroconf/multicast module
 	mdns = require('mdns2'),
 
+	// http-module for a web-gui
+	http = require('http'),
+
+	// static file server to .. serve static files
+	staticfiles = require('node-static'),
+
+	// socket.io for realtime-communication over http
+	socketio = require('socket.io'),
+
+	// communication port for web-clients
+	io = null,
+
 	// collect a list of available ip adresses for each local interface
 	addresses = listLocalAdresses(),
 
@@ -36,6 +48,9 @@ advertiseService();
 
 // start an mdns-browser, watching for osc compatible guests
 startGuestBrowser();
+
+// start the web inspection & management ui
+startWebUi();
 
 // start the relay operation
 startRelay();
@@ -217,6 +232,32 @@ function startGuestBrowser()
 
 	// start the browser
 	mdnsBrowser.start();
+}
+
+
+
+// start the web inspection & management ui
+function startWebUi()
+{
+	// create a static fileserver
+	var filesrv = new staticfiles.Server('./public');
+
+	// launch a conventional http server
+	var srv = http.createServer(function(request, response)
+	{
+		request.on('end', function() {
+			// potenionally interrupt for own api calls here
+
+			// no matching api-call? serve as file
+			filesrv.serve(request, response);
+		}).resume()
+	});
+
+	// launch a socket.io-communication channel ontop of the webserver
+	io = socketio.listen(srv);
+
+	// start the webserver on the configured port
+	srv.listen(config.webUiPort);
 }
 
 
