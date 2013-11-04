@@ -1,25 +1,85 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="UTF-8">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<title>Titel der Einzelseite</title>
+		<title>Stateful OSC Relay - WebUI</title>
 
-		<link href="app.css" rel="stylesheet">
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css" rel="stylesheet">
 		<style>
-			body {
-				background: red;
+
+		.main-nav {
+			padding-top: 20px;
+		}
+
+		@media (min-width: 768px) {
+			.main-nav {
+				padding-top: 100px;
 			}
+		}
+
 		</style>
 
 
-		<script src="app.js"></script>
+		<!--script src="//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script-->
+		<script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			// alert('jop.');
+			var socket = io.connect(window.location.protocol+'//'+window.location.host, {
+				'reconnection limit': 5000,
+				'sync disconnect on unload': true
+			});
+
+			socket.on('update', function(reason, bundle) {
+				console.log('update because of', reason, bundle);
+			});
 		</script>
 	</head>
 
 	<body>
-		<h1>Body</h1>
+		<div class="container">
+			<div class="row">
+				<div class="main-nav col-sm-3">
+					<ul class="nav nav-pills nav-stacked">
+						<li class="active"><a href="#">Devices</a></li>
+						<li><a href="#">Presets</a></li>
+						<li><a href="#">Settings</a></li>
+						<li><a href="#">Log</a></li>
+					</ul>
+				</div><!-- col-3 -->
+				<div class="col-sm-9">
+
+
+					<h2>Devices</h2>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Device Name</th>
+								<th>IPv4 Adress</th>
+								<th>Messages In/Out</th>
+								<th>Source</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>iPad #1</td>
+								<td>192.168.0.27</td>
+								<td>270/80</td>
+								<td>Zeroconf</td>
+							</tr>
+							<tr>
+								<td>iPad #2</td>
+								<td>192.168.0.32</td>
+								<td>266/120</td>
+								<td>Zeroconf</td>
+							</tr>
+						</tbody>
+					</table>
+
+
+				</div><!-- col-10 -->
+			</div><!-- row -->
+		</div><!-- container -->
 	</body>
 </html>

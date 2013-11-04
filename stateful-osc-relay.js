@@ -131,14 +131,14 @@ function advertiseService()
 // start an mdns-browser, watching for osc compatible guests
 function startGuestBrowser()
 {
-	var  mdnsBrowser = mdns.createBrowser(mdns.udp('osc'));
+	var mdnsBrowser = mdns.createBrowser(mdns.udp('osc'));
 
 	// wait for ZeroConf events
-	console.log('looking for new guests using ZeroConf')
+	console.log('looking for new guests using ZeroConf');
 
 	// on servide up
 	mdnsBrowser.on('serviceUp', function(service)
-	{
+		{
 		// sometimes an andvertisement without an address comes through..
 		if(service.addresses && service.addresses.length == 0)
 			return;
@@ -174,6 +174,9 @@ function startGuestBrowser()
 
 					// print a message
 					console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+
+					// notify the web-ui clients
+					updateWebUi('timeout');
 				}, config.guestTimeout * 1000);
 			}
 
@@ -197,6 +200,9 @@ function startGuestBrowser()
 
 				// print a message
 				console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+
+				// notify the web-ui clients
+				updateWebUi('timeout');
 			}, config.guestTimeout * 1000)
 		}
 
@@ -205,6 +211,9 @@ function startGuestBrowser()
 
 		// print another message
 		console.log('guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
+
+		// notify the web-ui clients
+		updateWebUi('guest-up');
 
 		// brief the new guest with our internal state
 		console.log('  briefing new guest with '+Object.keys(state).length+' values')
@@ -228,6 +237,9 @@ function startGuestBrowser()
 
 		// print a message
 		console.log('guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+
+		// notify the web-ui clients
+		updateWebUi('guest-down');
 	});
 
 	// start the browser
@@ -256,10 +268,47 @@ function startWebUi()
 	// launch a socket.io-communication channel ontop of the webserver
 	io = socketio.listen(srv);
 
+	io.configure(function()
+	{
+		io.enable('browser client minification');  // send minified client
+		io.enable('browser client gzip');          // gzip the file
+		io.set('log level', 2);                    // reduce logging
+		//srv.set("transports", ["xhr-polling"]);
+		//srv.set("polling duration", 10);
+		//srv.set("heartbeat interval", 15);
+		//srv.set("heartbeat timeout", 20);
+	});
+
+	io.sockets.on('connection', function (socket)
+	{
+		// brief fresh connected web-ui clients
+		socket.emit('update', 'initial', buildWebUiUpdateBundle())
+	});
+
+	// update all infos at least every 10 seconds
+	setInterval(function() {
+		updateWebUi('interval');
+	}, 10*1000)
+
 	// start the webserver on the configured port
 	srv.listen(config.webUiPort);
 }
 
+
+function updateWebUi(reason)
+{
+	// no webui - no notifications ;)
+	if(!io) return;
+
+	// broadcast ao all clients
+	io.sockets.emit('update', reason, buildWebUiUpdateBundle());
+}
+
+function buildWebUiUpdateBundle() {
+	return {
+		'foo': 'bar!'
+	}
+}
 
 
 // start the relay operation
