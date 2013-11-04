@@ -10,7 +10,7 @@ module.exports = {
 
 	// most of the time only one osc-app will run on a single ip. Therefore the relay will not transmit messsages back to the sender-ip unless you specify that flag
 	transmitBack: false,
-#
+
 	// usually receivers will anounce themselfs via zeroconf, but you can manually specify guests here, too - fo those who haven't seen the light yet
 	staticGuests: [
 		//{address: 192.168.178.31, port: 10002},
