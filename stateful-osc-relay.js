@@ -156,10 +156,10 @@ function startGuestBrowser()
 		}
 
 		// test all static configured guests and ignore their advertisements
-		for(idx in config.staticGuests)
+		for(name in config.staticGuests)
 		{
-			var address = guests[idx];
-			if(service.addresses.indexOf(address.address) !== -1 && service.port === address.port)
+			var guest = config.staticGuests[name];
+			if(service.addresses.indexOf(guest.address) !== -1 && service.port === guest.port)
 				return;
 		}
 
@@ -422,7 +422,7 @@ function startRelay()
 	});
 
 	// periodic retransmit/broadcast
-	if(config.broadcastInterval > 0 && config.staticGuests.length > 0)
+	if(config.broadcastInterval > 0 && Object.keys(config.staticGuests).length > 0)
 	{
 		setInterval(function() {
 			console.log('broadcasting complete internal state to static guests');
