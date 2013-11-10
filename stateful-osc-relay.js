@@ -378,9 +378,6 @@ function startRelay()
 						console.log('guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 					}, config.guestTimeout * 1000);
 				}
-
-				// if the configurations restricts back-transmissions - stop here
-				if(!config.transmitBack) return;
 			}
 
 			// print a message
