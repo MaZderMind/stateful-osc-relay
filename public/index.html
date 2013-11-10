@@ -26,13 +26,31 @@
 		<script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			var socket = io.connect(window.location.protocol+'//'+window.location.host, {
-				'reconnection limit': 5000,
-				'sync disconnect on unload': true
-			});
+			$(function() {
+				var
+					$tbody = $('.guest-table tbody'),
+					sourceNames = {z: 'Zeroconf', s: 'Static'};
 
-			socket.on('update', function(reason, bundle) {
-				console.log('update because of', reason, bundle);
+				var socket = io.connect(window.location.protocol+'//'+window.location.host, {
+					'reconnection limit': 5000,
+					'sync disconnect on unload': true
+				});
+
+				socket.on('update', function(reason, bundle) {
+					console.log('update because of', reason, bundle);
+
+					// clean and re-fill guest table
+					$tbody.find('> tr').remove();
+					for(var i = 0; i < bundle.g.length; i++) {
+						var guest = bundle.g[i];
+
+						$('<tr>')
+							.appendTo($tbody)
+							.append($('<td>').text(guest.n))
+							.append($('<td>').text(guest.a + ':' + guest.p))
+							.append($('<td>').text(  sourceNames[guest.s]  ));
+					};
+				})
 			});
 		</script>
 	</head>
@@ -52,28 +70,15 @@
 
 
 					<h2>Devices</h2>
-					<table class="table table-striped">
+					<table class="table table-striped guest-table">
 						<thead>
 							<tr>
-								<th>Device Name</th>
+								<th>Guest Name</th>
 								<th>IPv4 Adress</th>
-								<th>Messages In/Out</th>
 								<th>Source</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>iPad #1</td>
-								<td>192.168.0.27</td>
-								<td>270/80</td>
-								<td>Zeroconf</td>
-							</tr>
-							<tr>
-								<td>iPad #2</td>
-								<td>192.168.0.32</td>
-								<td>266/120</td>
-								<td>Zeroconf</td>
-							</tr>
 						</tbody>
 					</table>
 

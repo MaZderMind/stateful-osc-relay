@@ -309,8 +309,33 @@ function updateWebUi(reason)
 }
 
 function buildWebUiUpdateBundle() {
+	var webGuests = [];
+
+	for(name in guests)
+	{
+		var guest = guests[name];
+		webGuests.push({
+			a: guest.address,
+			p: guest.port,
+			s: 'z',
+			n: name
+		})
+	}
+
+	for(name in config.staticGuests)
+	{
+		var guest = config.staticGuests[name];
+		webGuests.push({
+			a: guest.address,
+			p: guest.port,
+			s: 's',
+			n: name
+		})
+	}
+
 	return {
-		'foo': 'bar!'
+		t: (new Date()).getTime(),
+		g: webGuests
 	}
 }
 
