@@ -107,6 +107,10 @@ function showWelcomeMessage()
 
 	console.log("  Outgoing Port:", config.receivePort);
 	console.log("");
+
+	// print some info about the webui
+	console.log("  To see the WebUi, go to http://127.0.0.1:" + config.webUiPort);
+	console.log("");
 }
 
 
