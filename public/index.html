@@ -19,6 +19,14 @@
 			}
 		}
 
+		.tab {
+			display: none;
+		}
+
+		.tab.active {
+			display: block;
+		}
+
 		</style>
 
 
@@ -29,7 +37,44 @@
 			$(function() {
 				var
 					$tbody = $('.guest-table tbody'),
+					$nav = $('.main-nav'),
+					$tabs = $('.tab'),
+					navBlendingDuration = 200,
 					sourceNames = {z: 'Zeroconf', s: 'Static'};
+
+				$nav.on('click', 'a', function() {
+					var
+						$a = $(this),
+						target = $(this).attr('href').substr(1);
+						$a.closest('ul').find('li').removeClass('active');
+						$a.closest('li').addClass('active');
+
+					$tabs.filter('.active').animate({
+						opacity: 0
+					}, {
+						duration: navBlendingDuration,
+						complete: function() {
+							$(this).removeClass('active').css({
+								opacity: '',
+								display: 'none'
+							});
+
+							$tabs.filter('.'+target+'-tab').css({
+								opacity: 0,
+								display: 'block'
+							}).animate({
+								opacity: 1
+							}, {
+								duration: navBlendingDuration,
+								complete: function() {
+									$(this).addClass('active').css({
+										opacity: ''
+									})
+								}
+							})
+						}
+					})
+				});
 
 				var socket = io.connect(window.location.protocol+'//'+window.location.host, {
 					'reconnection limit': 5000,
@@ -50,7 +95,7 @@
 							.append($('<td>').text(guest.a + ':' + guest.p))
 							.append($('<td>').text(  sourceNames[guest.s]  ));
 					};
-				})
+				});
 			});
 		</script>
 	</head>
@@ -58,19 +103,22 @@
 	<body>
 		<div class="container">
 			<div class="row">
-				<div class="main-nav col-sm-3">
+
+
+				<div class="col-sm-3 main-nav">
 					<ul class="nav nav-pills nav-stacked">
-						<li class="active"><a href="#">Devices</a></li>
-						<li><a href="#">Presets</a></li>
-						<li><a href="#">Config</a></li>
-						<li><a href="#">Message I/O</a></li>
-						<li><a href="#">Log</a></li>
+						<li class="active"><a href="#guests">Guests</a></li>
+						<li><a href="#presets">Presets</a></li>
+						<li><a href="#config">Config</a></li>
+						<li><a href="#messages">Message I/O</a></li>
+						<li><a href="#log">Log</a></li>
 					</ul>
-				</div><!-- col-3 -->
-				<div class="col-sm-9">
+				</div><!-- col-sm-3 main-nav -->
 
 
-					<h2>Devices</h2>
+				<div class="col-sm-9 guests-tab tab active">
+
+					<h2>Guests</h2>
 					<table class="table table-striped guest-table">
 						<thead>
 							<tr>
@@ -83,8 +131,17 @@
 						</tbody>
 					</table>
 
+				</div><!-- col-sm-9 guests-tab tab active -->
 
-				</div><!-- col-10 -->
+
+				<div class="col-sm-9 presets-tab tab">
+
+					<h2>Presets</h2>
+					<p>tbd.</p>
+
+				</div><!-- col-sm-9 presets-tab tab -->
+
+
 			</div><!-- row -->
 		</div><!-- container -->
 	</body>
