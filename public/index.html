@@ -27,6 +27,18 @@
 			display: block;
 		}
 
+		.guest-table {
+			table-layout: fixed;
+		}
+
+		.guest-table .ipv4 { width: 200px; }
+		.guest-table .source { width: 100px; }
+
+		.guest-table .no-guests {
+			font-style: italic;
+			text-align: center;
+		}
+
 		</style>
 
 
@@ -86,15 +98,26 @@
 
 					// clean and re-fill guest table
 					$tbody.find('> tr').remove();
-					for(var i = 0; i < bundle.g.length; i++) {
-						var guest = bundle.g[i];
+					if(bundle.g.length > 0)
+					{
+						for(var i = 0; i < bundle.g.length; i++) {
+							var guest = bundle.g[i];
 
+							$('<tr>')
+								.appendTo($tbody)
+								.append($('<td>').text(guest.n))
+								.append($('<td>').text(guest.a + ':' + guest.p))
+								.append($('<td>').text(  sourceNames[guest.s]  ));
+						};
+					}
+					else {
 						$('<tr>')
 							.appendTo($tbody)
-							.append($('<td>').text(guest.n))
-							.append($('<td>').text(guest.a + ':' + guest.p))
-							.append($('<td>').text(  sourceNames[guest.s]  ));
-					};
+							.append(
+								$('<td colspan="3" class="no-guests">')
+									.text('Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?')
+							)
+					}
 				});
 			});
 		</script>
@@ -122,9 +145,9 @@
 					<table class="table table-striped guest-table">
 						<thead>
 							<tr>
-								<th>Guest Name</th>
-								<th>IPv4 Adress</th>
-								<th>Source</th>
+								<th class="name">Guest Name</th>
+								<th class="ipv4">IPv4 Adress</th>
+								<th class="source">Source</th>
 							</tr>
 						</thead>
 						<tbody>
