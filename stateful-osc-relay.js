@@ -360,7 +360,7 @@ function startRelay()
 		}
 
 		// print some message
-		console.log('received message from '+rinfo.address+':', message.address, 'with', message.args.length, 'arg(s)');
+		console.log('received message from '+rinfo.address+':', message.address, 'with', (message.args ? message.args.length : 0), 'arg(s)');
 
 		// test if the message matches one of the filters
 		var filterResult = isMessageFiltered(message.address);
