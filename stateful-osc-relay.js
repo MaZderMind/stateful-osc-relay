@@ -147,13 +147,17 @@ function startGuestBrowser()
 		if(service.addresses && service.addresses.length == 0)
 			return;
 
-		// test all our own adresses to filter out our own advertisement
+		// test all our own external adresses to filter out our own advertisement
 		for(idx in addresses)
 		{
 			var address = addresses[idx];
 			if(service.addresses.indexOf(address.address) !== -1 && service.port === config.receivePort)
 				return;
 		}
+
+		// test our internal address
+		if(service.addresses.indexOf('127.0.0.1') !== -1 && service.port === config.receivePort)
+			return;
 
 		// test all static configured guests and ignore their advertisements
 		for(name in config.staticGuests)
