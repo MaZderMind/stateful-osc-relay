@@ -78,6 +78,12 @@
 						.addClass('active');
 				}
 
+				if(window.location.hash)
+				{
+					var target = window.location.hash.substr(1);
+					navigateTo(target);
+				}
+
 
 
 				// Socket communication
