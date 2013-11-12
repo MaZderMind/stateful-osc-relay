@@ -51,43 +51,36 @@
 					$tbody = $('.guest-table tbody'),
 					$nav = $('.main-nav'),
 					$tabs = $('.tab'),
-					navBlendingDuration = 200,
 					sourceNames = {z: 'Zeroconf', s: 'Static'};
 
+				// Navigation
 				$nav.on('click', 'a', function() {
 					var
 						$a = $(this),
 						target = $(this).attr('href').substr(1);
-						$a.closest('ul').find('li').removeClass('active');
-						$a.closest('li').addClass('active');
 
-					$tabs.filter('.active').animate({
-						opacity: 0
-					}, {
-						duration: navBlendingDuration,
-						complete: function() {
-							$(this).removeClass('active').css({
-								opacity: '',
-								display: 'none'
-							});
-
-							$tabs.filter('.'+target+'-tab').css({
-								opacity: 0,
-								display: 'block'
-							}).animate({
-								opacity: 1
-							}, {
-								duration: navBlendingDuration,
-								complete: function() {
-									$(this).addClass('active').css({
-										opacity: ''
-									})
-								}
-							})
-						}
-					})
+					navigateTo(target);
 				});
 
+				function navigateTo(target)
+				{
+					// shift focus on nav buttons
+					$nav
+						.find('li')
+						.removeClass('active')
+						.filter('.nav-'+target)
+						.addClass('active');
+
+					// shift focus on active tab
+					$tabs
+						.removeClass('active')
+						.filter('.'+target+'-tab')
+						.addClass('active');
+				}
+
+
+
+				// Socket communication
 				var socket = io.connect(window.location.protocol+'//'+window.location.host, {
 					'reconnection limit': 5000,
 					'sync disconnect on unload': true
@@ -130,11 +123,11 @@
 
 				<div class="col-sm-3 main-nav">
 					<ul class="nav nav-pills nav-stacked">
-						<li class="active"><a href="#guests">Guests</a></li>
-						<li><a href="#presets">Presets</a></li>
-						<li><a href="#config">Config</a></li>
-						<li><a href="#messages">Message I/O</a></li>
-						<li><a href="#log">Log</a></li>
+						<li class="nav-guests active"><a href="#guests">Guests</a></li>
+						<li class="nav-presets"><a href="#presets">Presets</a></li>
+						<li class="nav-config"><a href="#config">Config</a></li>
+						<li class="nav-messages"><a href="#messages">Message I/O</a></li>
+						<li class="nav-log"><a href="#log">Log</a></li>
 					</ul>
 				</div><!-- col-sm-3 main-nav -->
 
