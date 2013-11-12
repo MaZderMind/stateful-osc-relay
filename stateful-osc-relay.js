@@ -20,6 +20,15 @@ var
 	// http-module for a web-gui
 	http = require('http'),
 
+	// fs-module for filesystem juggeling
+	fs = require('fs'),
+
+	// patg-module for path manipulatiom
+	path = require('path'),
+
+	// less-module for dynamic recompile of less-css files
+	less = require('less'),
+
 	// static file server to .. serve static files
 	staticfiles = require('node-static'),
 
@@ -48,6 +57,9 @@ advertiseService();
 
 // start an mdns-browser, watching for osc compatible guests
 startGuestBrowser();
+
+// start the lesscss recompile
+startLessCssRecompiler();
 
 // start the web inspection & management ui
 startWebUi();
@@ -300,6 +312,50 @@ function startWebUi()
 
 	// start the webserver on the configured port
 	srv.listen(config.webUiPort);
+}
+
+function startLessCssRecompiler()
+{
+	// recompile on any change in the less dir
+	fs.watch('public/less/', function() {
+		// only recompile the app.less - all other files are includes
+		recompile('public/less/app.less', 'public/app.css')
+	});
+
+	// recompile on startup
+	recompile('public/less/app.less', 'public/app.css')
+
+
+
+	function recompile(lessfile, cssfile)
+	{
+		console.log('lesscss recompile '+lessfile+' -> '+cssfile);
+
+		fs.readFile(lessfile, {encoding: 'utf8'}, function(err, lesscode)
+		{
+			if(err)
+				return console.log('lesscss error: unable to read less file ' + lessfile, err)
+
+			less.render(
+				lesscode,
+				{
+					conpress: true,
+					relativeUrls: true,
+					paths: [path.dirname(lessfile)]
+				},
+				function(err, csscode) {
+					if(err)
+						return console.log('lesscss error', less.formatError(err))
+
+					fs.writeFile(cssfile, csscode, {encoding: 'utf8'}, function(err) {
+						if(err)
+							return console.log('unable to write css file ' + cssfile, err);
+					});
+				}
+			);
+		});
+
+	}
 }
 
 

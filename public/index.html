@@ -7,168 +7,14 @@
 		<title>Stateful OSC Relay - WebUI</title>
 
 		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css" rel="stylesheet">
-		<style>
-
-		.main-nav {
-			padding-top: 20px;
-		}
-
-		@media (min-width: 768px) {
-			.main-nav {
-				padding-top: 100px;
-			}
-		}
-
-		.tab {
-			display: none;
-		}
-
-		.tab.active {
-			display: block;
-		}
-
-		.guests-tab table {
-			table-layout: fixed;
-		}
-
-		.guests-tab td.ipv4 { width: 200px; }
-		.guests-tab td.source { width: 100px; }
-
-		.guests-tab td.no-guests {
-			font-style: italic;
-			text-align: center;
-		}
-
-		.presets-tab .tile {
-			background: red;
-			height: 200px;
-			line-height: 200px;
-			text-align: center;
-
-			height: 120px;
-			line-height: 120px;
-			margin-bottom: 30px;
-
-			color: #fff;
-			background-color: #428bca;
-			border-radius: 4px;
-		}
-
-		@media (min-width: 768px) {
-			.presets-tab .tile {
-				height: 158px;
-				line-height: 158px;
-			}
-		}
-
-		@media (min-width: 992px) {
-			.presets-tab .tile {
-				height: 213px;
-				line-height: 213px;
-			}
-		}
-
-		@media (min-width: 1200px) {
-			.presets-tab .tile {
-				height: 189px;
-				line-height: 189px;
-			}
-		}
-
-
-		</style>
+		<link href="app.css" rel="stylesheet">
 
 
 		<!--script src="//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script-->
 		<script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
-		<script>
-			$(function() {
-				var
-					$tbody = $('.guests-table tbody'),
-					$nav = $('.main-nav'),
-					$tabs = $('.tab'),
-					sourceNames = {z: 'Zeroconf', s: 'Static'};
-
-				// Navigation
-				$nav.on('click', 'a', function() {
-					var
-						$a = $(this),
-						target = $(this).attr('href').substr(1);
-
-					navigateTo(target);
-				});
-
-				function navigateTo(target)
-				{
-					// store last page in cookie
-					$.cookie('osc-nav', target);
-
-					// shift focus on nav buttons
-					$nav
-						.find('li')
-						.removeClass('active')
-						.filter('.nav-'+target)
-						.addClass('active');
-
-					// shift focus on active tab
-					$tabs
-						.removeClass('active')
-						.filter('.'+target+'-tab')
-						.addClass('active');
-				}
-
-				// Permalink
-				if(window.location.hash)
-				{
-					var target = window.location.hash.substr(1);
-					navigateTo(target);
-				}
-
-				// Cookie
-				
-				if($.cookie('osc-nav'))
-				{
-					navigateTo($.cookie('osc-nav'));
-				}
-
-
-
-				// Socket communication
-				var socket = io.connect(window.location.protocol+'//'+window.location.host, {
-					'reconnection limit': 5000,
-					'sync disconnect on unload': true
-				});
-
-				socket.on('update', function(reason, bundle) {
-					console.log('update because of', reason, bundle);
-
-					// clean and re-fill guest table
-					$tbody.find('> tr').remove();
-					if(bundle.g.length > 0)
-					{
-						for(var i = 0; i < bundle.g.length; i++) {
-							var guest = bundle.g[i];
-
-							$('<tr>')
-								.appendTo($tbody)
-								.append($('<td>').text(guest.n))
-								.append($('<td>').text(guest.a + ':' + guest.p))
-								.append($('<td>').text(  sourceNames[guest.s]  ));
-						};
-					}
-					else {
-						$('<tr>')
-							.appendTo($tbody)
-							.append(
-								$('<td colspan="3" class="no-guests">')
-									.text('Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?')
-							)
-					}
-				});
-			});
-		</script>
+		<script src="app.js"></script>
 	</head>
 
 	<body>
@@ -209,11 +55,11 @@
 
 					<h2>Presets</h2>
 					<div class="row">
-						<div class="col-lg-3 col-sm-4 col-xs-6"><div class="tile">Foo</div></div>
-						<div class="col-lg-3 col-sm-4 col-xs-6"><div class="tile">Bar</div></div>
-						<div class="col-lg-3 col-sm-4 col-xs-6"><div class="tile">Moo</div></div>
-						<div class="col-lg-3 col-sm-4 col-xs-6"><div class="tile">Zoo</div></div>
-						<div class="col-lg-3 col-sm-4 col-xs-6"><div class="tile">Doo</div></div>
+
+						<div class="col-lg-3 col-sm-4 col-xs-6">
+							<div class="tile new">Save current State as Preset</div>
+						</div>
+
 					</div>
 
 				</div><!-- col-sm-9 presets-tab tab -->

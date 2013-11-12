@@ -1,0 +1,75 @@
+@import "variables.less";
+
+// main-nav padding to line up with headline
+.main-nav {
+	padding-top: 20px;
+	
+	// min-width: Small screen / tablet
+	@media (min-width: @screen-sm-min) {
+		// on extra-small devices no padding es required
+		padding-top: 100px;
+	}
+}
+
+
+// tabbed content
+.tab {
+	display: none;
+
+	&.active {
+		display: block;
+	}
+}
+
+// guests page
+.guests-tab {
+	table {
+		table-layout: fixed;
+
+		td.ipv4 { width: 200px; }
+		td.source { width: 100px; }
+
+		td.no-guests {
+			font-style: italic;
+			text-align: center;
+		}
+	}
+}
+
+// presets tab
+.presets-tab
+{
+	.tile {
+		@padding: 20px;
+
+		text-align: center;
+
+		height: 120px;
+		line-height: 120px - 2*@padding;
+		margin-bottom: 30px;
+		padding: @padding;
+
+		color: @btn-primary-color;
+		background-color: @btn-primary-bg;
+		border-radius: @border-radius-base;
+
+
+		// min-width: Small screen / tablet
+		@media (min-width: @screen-sm-min) {
+			height: 158px;
+			line-height: 158px - 2*@padding;
+		}
+
+		// min-width: Medium screen / desktop
+		@media (min-width: @screen-md-min) {
+			height: 213px;
+			line-height: 213px - 2*@padding;
+		}
+
+		// min-width: Large screen / wide desktop
+		@media (min-width: @screen-lg-min) {
+			height: 189px;
+			line-height: 189px - 2*@padding;
+		}
+	}
+}
