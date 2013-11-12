@@ -339,7 +339,7 @@ function startLessCssRecompiler()
 			less.render(
 				lesscode,
 				{
-					conpress: true,
+					//compress: true,
 					relativeUrls: true,
 					paths: [path.dirname(lessfile)]
 				},
