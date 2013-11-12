@@ -43,34 +43,40 @@
 		@padding: 20px;
 
 		text-align: center;
-
 		height: 120px;
-		line-height: 120px - 2*@padding; // FIXME multiline center
 		margin-bottom: 30px;
-		padding: @padding;
 		cursor: pointer;
 
-		color: @btn-primary-color;
-		background-color: @btn-primary-bg;
-		border-radius: @border-radius-base;
+		display: table;
 
+		p {
+			display: table-cell;
+			vertical-align: middle;
+
+			padding: 0 @padding;
+
+			color: @btn-primary-color;
+			background-color: @btn-primary-bg;
+			border-radius: @border-radius-base;
+		}
+
+		&.new {
+			font-style: italic;
+		}
 
 		// min-width: Small screen / tablet
 		@media (min-width: @screen-sm-min) {
 			height: 158px;
-			line-height: 158px - 2*@padding;
 		}
 
 		// min-width: Medium screen / desktop
 		@media (min-width: @screen-md-min) {
 			height: 213px;
-			line-height: 213px - 2*@padding;
 		}
 
 		// min-width: Large screen / wide desktop
 		@media (min-width: @screen-lg-min) {
 			height: 189px;
-			line-height: 189px - 2*@padding;
 		}
 	}
 }
