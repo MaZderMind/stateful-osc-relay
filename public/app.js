@@ -1,6 +1,7 @@
 $(function() {
 	var
-		$tbody = $('.guests-table tbody'),
+		$tbody = $('.guests-tab tbody'),
+		$presetsContainer = $('.presets-tab .row'),
 		$nav = $('.main-nav'),
 		$tabs = $('.tab'),
 		sourceNames = {z: 'Zeroconf', s: 'Static'};
@@ -33,19 +34,32 @@ $(function() {
 			.addClass('active');
 	}
 
-	// Permalink
+	// By Permalink
 	if(window.location.hash)
 	{
 		var target = window.location.hash.substr(1);
 		navigateTo(target);
 	}
 
-	// Cookie
-	
+	// By Cookie
 	if($.cookie('osc-nav'))
 	{
 		navigateTo($.cookie('osc-nav'));
 	}
+
+
+
+	// preset buttons
+	$('.presets-tab').on('click', '.tile', function(e) {
+		var $tile = $(this);
+
+		if($tile.hasClass('new'))
+		{
+			// using a simple prompt is good for mobile devices and okay for desktop systems
+			var promptedName = prompt('Choose a new Preset-Name');
+			socket.emit('newPreset', promptedName);
+		}
+	});
 
 
 
@@ -80,5 +94,22 @@ $(function() {
 						.text('Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?')
 				)
 		}
+
+		// clear and re-fill preset list
+		var $newTile = $presetsContainer.find('.tile.new');
+		$presetsContainer.find('.tile:not(.new)').remove();
+
+		for(var i = 0; i < bundle.p.length; i++) {
+			var preset = bundle.p[i];
+
+			// Somehow pulse/highlight new tiles
+			$newTile
+				.clone()
+				.removeClass('new')
+				.appendTo($presetsContainer)
+				.children('p')
+					.text(preset);
+		}
+
 	});
 });

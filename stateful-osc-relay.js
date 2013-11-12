@@ -41,6 +41,9 @@ var
 	// collect a list of available ip adresses for each local interface
 	addresses = listLocalAdresses(),
 
+	// list of currently known presets
+	presets = [],
+
 	// currently connected guests by name
 	guests = {},
 
@@ -60,6 +63,9 @@ startGuestBrowser();
 
 // start the lesscss recompile
 startLessCssRecompiler();
+
+// start the relay operation
+loadPresets();
 
 // start the web inspection & management ui
 startWebUi();
@@ -299,11 +305,35 @@ function startWebUi()
 		//srv.set("heartbeat timeout", 20);
 	});
 
-	io.sockets.on('connection', function (socket)
+	io.sockets.on('connection', function(socket)
 	{
 		// brief fresh connected web-ui clients
 		socket.emit('update', 'initial', buildWebUiUpdateBundle())
+
+		// event handlers
+		socket.on('newPreset', function(name)
+		{
+			console.log('writing new preset with name', name, 'and', Object.keys(state).length, 'values');
+
+			var elements =  {};
+			for(var address in state)
+			{
+				elements[address] = state[address].args;
+			};
+
+			var jsonStr = JSON.stringify(elements);
+			fs.writeFile(path.join('presets', name+'.json'), jsonStr, {encoding: 'utf8'}, function(err) {
+				if(err)
+					return console.log('error writing file', err);
+
+				if(presets.indexOf(name) === -1)
+					presets.push(name);
+
+				updateWebUi('new preset');
+			})
+		});
 	});
+
 
 	// update all infos at least every 10 seconds
 	setInterval(function() {
@@ -395,8 +425,28 @@ function buildWebUiUpdateBundle() {
 
 	return {
 		t: (new Date()).getTime(),
-		g: webGuests
+		g: webGuests,
+		p: presets
 	}
+}
+
+
+function loadPresets()
+{
+	console.log('loading presets');
+	fs.readdir('presets/', function(err, files) {
+		files.forEach(function(file) {
+			path.parse
+			if(path.extname(file) == '.json')
+			{
+				presets.push(
+					path.basename(file, '.json')
+				);
+			}
+		})
+
+		console.log('loaded', presets.length,'presets: ', presets);
+	});
 }
 
 
@@ -540,7 +590,7 @@ function isMessageFiltered(messageAdress)
 
 function generateBundleBuffer()
 {
-	var elements =  []
+	var elements = [];
 	for(var address in state)
 	{
 		elements.push({
@@ -548,7 +598,6 @@ function generateBundleBuffer()
 			address: address,
 			args: state[address].args
 		})
-
 	};
 
 	var buffer = osc.toBuffer({

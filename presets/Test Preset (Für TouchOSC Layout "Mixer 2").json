@@ -1,0 +1,5 @@
+{
+	"/1/fader1": [{"type":"float","value": 0.5}],
+	"/1/fader2": [{"type":"float","value": 0.25}],
+	"/1/fader3": [{"type":"float","value": 0.0}]
+}
