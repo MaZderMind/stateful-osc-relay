@@ -68,7 +68,7 @@ function listLocalAdresses()
 		addresses = [];
 
 	// iterate all interfaces by name
-	for(ifName in interfaces)
+	for(var ifName in interfaces)
 	{
 		// iterate all adresses of these interface
 		interfaces[ifName].forEach(function(ifAddressInfo)
@@ -148,7 +148,7 @@ function startGuestBrowser()
 			return;
 
 		// test all our own external adresses to filter out our own advertisement
-		for(idx in addresses)
+		for(var idx in addresses)
 		{
 			var address = addresses[idx];
 			if(service.addresses.indexOf(address.address) !== -1 && service.port === config.receivePort)
@@ -160,7 +160,7 @@ function startGuestBrowser()
 			return;
 
 		// test all static configured guests and ignore their advertisements
-		for(name in config.staticGuests)
+		for(var name in config.staticGuests)
 		{
 			var guest = config.staticGuests[name];
 			if(service.addresses.indexOf(guest.address) !== -1 && service.port === guest.port)
@@ -315,7 +315,7 @@ function updateWebUi(reason)
 function buildWebUiUpdateBundle() {
 	var webGuests = [];
 
-	for(name in guests)
+	for(var name in guests)
 	{
 		var guest = guests[name];
 		webGuests.push({
@@ -326,7 +326,7 @@ function buildWebUiUpdateBundle() {
 		})
 	}
 
-	for(name in config.staticGuests)
+	for(var name in config.staticGuests)
 	{
 		var guest = config.staticGuests[name];
 		webGuests.push({
@@ -417,11 +417,11 @@ function startRelay()
 		}
 
 		// iterare static guests
-		for(name in config.staticGuests)
+		for(var name in config.staticGuests)
 			forward(name, staticGuests[name]);
 
 		// iterare dynmaic guests
-		for(name in guests)
+		for(var name in guests)
 			forward(name, guests[name]);
 	});
 
@@ -433,7 +433,7 @@ function startRelay()
 			var buffer = generateBundleBuffer();
 
 			// iterare static guests
-			for(name in config.staticGuests)
+			for(var name in config.staticGuests)
 			{
 				var guest = config.staticGuests[name];
 				esock.send(buffer, 0, buffer.length, guest.port, guest.address);
@@ -449,7 +449,7 @@ function startRelay()
 function isMessageFiltered(messageAdress)
 {
 	// iterate over all filters
-	for(name in config.messageFilter)
+	for(var name in config.messageFilter)
 	{
 		var filter = config.messageFilter[name];
 		
@@ -485,7 +485,7 @@ function isMessageFiltered(messageAdress)
 function generateBundleBuffer()
 {
 	var elements =  []
-	for(address in state)
+	for(var address in state)
 	{
 		elements.push({
 			oscType: "message",
