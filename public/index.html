@@ -27,17 +27,50 @@
 			display: block;
 		}
 
-		.guest-table {
+		.guests-tab table {
 			table-layout: fixed;
 		}
 
-		.guest-table .ipv4 { width: 200px; }
-		.guest-table .source { width: 100px; }
+		.guests-tab td.ipv4 { width: 200px; }
+		.guests-tab td.source { width: 100px; }
 
-		.guest-table .no-guests {
+		.guests-tab td.no-guests {
 			font-style: italic;
 			text-align: center;
 		}
+
+		.presets-tab .tile {
+			background: red;
+			height: 200px;
+			line-height: 200px;
+			text-align: center;
+
+			height: 120px;
+			line-height: 120px;
+			margin-bottom: 15px;
+		}
+
+		@media (min-width: 768px) {
+			.presets-tab .tile {
+				height: 158px;
+				line-height: 158px;
+			}
+		}
+
+		@media (min-width: 992px) {
+			.presets-tab .tile {
+				height: 213px;
+				line-height: 213px;
+			}
+		}
+
+		@media (min-width: 1200px) {
+			.presets-tab .tile {
+				height: 262px;
+				line-height: 262px;
+			}
+		}
+
 
 		</style>
 
@@ -153,7 +186,7 @@
 				<div class="col-sm-9 guests-tab tab active">
 
 					<h2>Guests</h2>
-					<table class="table table-striped guest-table">
+					<table class="table table-striped guests-table">
 						<thead>
 							<tr>
 								<th class="name">Guest Name</th>
@@ -171,7 +204,11 @@
 				<div class="col-sm-9 presets-tab tab">
 
 					<h2>Presets</h2>
-					<p>tbd.</p>
+					<div class="row">
+						<div class="col-xs-4"><div class="tile">Foo</div></div>
+						<div class="col-xs-4"><div class="tile">Bar</div></div>
+						<div class="col-xs-4"><div class="tile">Moo</div></div>
+					</div>
 
 				</div><!-- col-sm-9 presets-tab tab -->
 
