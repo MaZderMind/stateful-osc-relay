@@ -57,7 +57,12 @@ $(function() {
 		{
 			// using a simple prompt is good for mobile devices and okay for desktop systems
 			var promptedName = prompt('Choose a new Preset-Name');
-			socket.emit('newPreset', promptedName);
+			if(promptedName)
+				socket.emit('newPreset', promptedName);
+		}
+		else
+		{
+			socket.emit('loadPreset', $.trim($tile.text()));
 		}
 	});
 

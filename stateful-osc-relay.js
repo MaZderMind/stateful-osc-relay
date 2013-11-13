@@ -304,21 +304,53 @@ function startWebUi()
 		{
 			logger.log('info', 'writing new preset with name', name, 'and', Object.keys(state).length, 'values');
 
-			var elements =  {};
-			for(var address in state)
-			{
-				elements[address] = state[address].args;
-			};
-
-			var jsonStr = JSON.stringify(elements);
+			var jsonStr = JSON.stringify(state, null, "\t");
 			fs.writeFile(path.join('presets', name+'.json'), jsonStr, {encoding: 'utf8'}, function(err) {
 				if(err)
-					return logger.log('error', 'error writing file', err);
+					return logger.log('error', 'error writing preset-file', err);
 
 				if(presets.indexOf(name) === -1)
 					presets.push(name);
 
 				updateWebUi('new preset');
+			})
+		});
+
+
+		socket.on('loadPreset', function(name)
+		{
+			logger.log('info', 'loading preset with name', name);
+
+			fs.readFile(path.join('presets', name+'.json'), {encoding: 'utf8'}, function(err, data) {
+				if(err)
+					return logger.log('warn', 'error reading preset-file', err);
+
+				try {
+					var preset = JSON.parse(data)
+				}
+				catch(e) {
+					return logger.log('warn', 'error parsing preset-file', name+'.json', e);
+				}
+
+				// update state
+				state = preset;
+
+				// send an update to all guests
+				var buffer = generateBundleBuffer();
+
+				// iterare static guests
+				for(var name in config.staticGuests)
+				{
+					var guest = config.staticGuests[name];
+					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+				}
+
+				// iterare dynamic guests
+				for(var name in guests)
+				{
+					var guest = guests[name];
+					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
+				}
 			})
 		});
 	});
@@ -503,7 +535,8 @@ function startRelay()
 		}
 	});
 
-	// periodic retransmit/broadcast
+	// dynamic guests get their brief when they come up. with static guests we don't know ehn they go down or up,
+	// so we'll shedule a periodic retransmit/broadcast
 	if(config.broadcastInterval > 0 && Object.keys(config.staticGuests).length > 0)
 	{
 		setInterval(function() {
