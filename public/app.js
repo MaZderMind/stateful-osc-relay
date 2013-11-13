@@ -50,9 +50,10 @@ $(function() {
 
 
 	// preset buttons
-	$('.presets-tab').on('click', '.tile', function(e) {
+	$('.presets-tab').on('touchstart click', '.tile', function(e) {
 		var $tile = $(this);
 
+		e.preventDefault();
 		if($tile.hasClass('create'))
 		{
 			// using a simple prompt is good for mobile devices and okay for desktop systems
