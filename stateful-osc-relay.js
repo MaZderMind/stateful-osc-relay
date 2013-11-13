@@ -148,6 +148,15 @@ function advertiseService()
 			name: 'Stateful OSC-Relay on '+os.hostname()
 		}
 	).start();
+
+	// advertise our WebUI
+	mdns.createAdvertisement(
+		mdns.tcp('http'),
+		config.webUiPort,
+		{
+			name: 'WebUI of Stateful OSC-Relay on '+os.hostname()
+		}
+	).start();
 }
 
 
