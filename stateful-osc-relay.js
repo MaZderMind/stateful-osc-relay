@@ -39,7 +39,7 @@ var
 	io = null,
 
 	// collect a list of available ip adresses for each local interface
-	addresses = listLocalAdresses(),
+	addresses = [],
 
 	// list of currently known presets
 	presets = [],
@@ -51,6 +51,8 @@ var
 	state = {};
 
 
+// start monitoring local ip adresses
+updateLocalAdresses();
 
 // show a welcome message with useful information
 showWelcomeMessage();
@@ -79,11 +81,11 @@ startRelay();
 
 
 // collect a list of available ip adresses for each local interface
-function listLocalAdresses()
+function updateLocalAdresses()
 {
-	var
-		interfaces = os.networkInterfaces(),
-		addresses = [];
+	var interfaces = os.networkInterfaces();
+
+	addresses = [];
 
 	// iterate all interfaces by name
 	for(var ifName in interfaces)
@@ -97,7 +99,7 @@ function listLocalAdresses()
 		});
 	};
 
-	return addresses;
+	console.log('enumerated', addresses.length, 'non-internal local ip adresses on', Object.keys(interfaces).length, 'network interfaces');
 }
 
 
@@ -160,7 +162,7 @@ function startGuestBrowser()
 
 	// on servide up
 	mdnsBrowser.on('serviceUp', function(service)
-		{
+	{
 		// sometimes an andvertisement without an address comes through..
 		if(service.addresses && service.addresses.length == 0)
 			return;
@@ -172,6 +174,9 @@ function startGuestBrowser()
 			if(service.addresses.indexOf(address.address) !== -1 && service.port === config.receivePort)
 				return;
 		}
+
+		// update the list of internal addresses so we don't eat our own announcement when changing ips
+		updateLocalAdresses();
 
 		// test our internal address
 		if(service.addresses.indexOf('127.0.0.1') !== -1 && service.port === config.receivePort)
