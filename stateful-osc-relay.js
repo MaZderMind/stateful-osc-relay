@@ -514,7 +514,7 @@ function startRelay()
 
 		if(config.valueStoreTimeout > 0)
 		{
-			state.timeout = setTimeout(function()
+			state[message.address].timeout = setTimeout(function()
 			{
 				logger.log('info', 'removing message', message.address, 'from internal state');
 				delete state[message.address];
