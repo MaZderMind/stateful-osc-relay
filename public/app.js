@@ -53,7 +53,7 @@ $(function() {
 	$('.presets-tab').on('click', '.tile', function(e) {
 		var $tile = $(this);
 
-		if($tile.hasClass('new'))
+		if($tile.hasClass('create'))
 		{
 			// using a simple prompt is good for mobile devices and okay for desktop systems
 			var promptedName = prompt('Choose a new Preset-Name');
@@ -106,16 +106,24 @@ $(function() {
 		}
 
 		// clear and re-fill preset list
-		var $newTile = $presetsContainer.find('.tile.new');
-		$presetsContainer.find('.tile:not(.new)').remove();
+		var $tileTemplate = $presetsContainer.find('.tile.create');
+		$presetsContainer.find('.tile:not(.create)').remove();
 
-		for(var i = 0; i < bundle.p.length; i++) {
-			var preset = bundle.p[i];
+		var stateClasses = {
+			'new': 'animated flipInY',
+			'used': 'animated bounce'
+		};
+
+		for(var preset in bundle.p) {
+			var state = bundle.p[preset];
 
 			// Somehow pulse/highlight new tiles
-			$newTile
+			$tileTemplate
 				.clone()
-				.removeClass('new')
+				.removeClass('create')
+				.addClass(
+					stateClasses[state]
+				)
 				.appendTo($presetsContainer)
 				.children('p')
 					.text(preset);

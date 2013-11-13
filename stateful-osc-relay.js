@@ -46,7 +46,7 @@ var
 	addresses = [],
 
 	// list of currently known presets
-	presets = [],
+	presets = {},
 
 	// currently connected guests by name
 	guests = {},
@@ -309,8 +309,8 @@ function startWebUi()
 				if(err)
 					return logger.log('error', 'error writing preset-file', err);
 
-				if(presets.indexOf(name) === -1)
-					presets.push(name);
+				if(!presets[name])
+					presets[name] = 'new';
 
 				updateWebUi('new preset');
 			})
@@ -339,18 +339,22 @@ function startWebUi()
 				var buffer = generateBundleBuffer();
 
 				// iterare static guests
-				for(var name in config.staticGuests)
+				for(var guestname in config.staticGuests)
 				{
-					var guest = config.staticGuests[name];
+					var guest = config.staticGuests[guestname];
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
 
 				// iterare dynamic guests
-				for(var name in guests)
+				for(var guestname in guests)
 				{
-					var guest = guests[name];
+					var guest = guests[guestname];
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
+
+				// update preset state and show in WebUI
+				presets[name] = 'used';
+				updateWebUi('preset used');
 			})
 		});
 	});
@@ -417,6 +421,10 @@ function updateWebUi(reason)
 
 	// broadcast ao all clients
 	io.sockets.emit('update', reason, buildWebUiUpdateBundle());
+
+	// reset preset-state
+	for(var preset in presets)
+		presets[preset] = '';
 }
 
 function buildWebUiUpdateBundle() {
@@ -461,13 +469,11 @@ function loadPresets()
 			path.parse
 			if(path.extname(file) == '.json')
 			{
-				presets.push(
-					path.basename(file, '.json')
-				);
+				presets[path.basename(file, '.json')] = '';
 			}
 		})
 
-		logger.log('info', 'loaded', presets.length,'presets: ', presets);
+		logger.log('info', 'loaded', Object.keys(presets).length,'presets');
 	});
 }
 
