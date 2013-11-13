@@ -35,6 +35,10 @@ var
 	// socket.io for realtime-communication over http
 	socketio = require('socket.io'),
 
+	// re-use the socket.io logger
+	Logger = require('socket.io/lib/logger'),
+	logger = new Logger();
+
 	// communication port for web-clients
 	io = null,
 
@@ -50,6 +54,8 @@ var
 	// having a little state is also a good idea
 	state = {};
 
+
+logger.log('info', 'Starting up the System');
 
 // start monitoring local ip adresses
 updateLocalAdresses();
@@ -99,7 +105,7 @@ function updateLocalAdresses()
 		});
 	};
 
-	console.log('enumerated', addresses.length, 'non-internal local ip adresses on', Object.keys(interfaces).length, 'network interfaces');
+	logger.log('info', 'enumerated', addresses.length, 'non-internal local ip adresses on', Object.keys(interfaces).length, 'network interfaces');
 }
 
 
@@ -108,14 +114,16 @@ function updateLocalAdresses()
 function showWelcomeMessage()
 {
 	// print that list and the configured port for the users convinience
+	logger.log('info', 'printing a nice message for the users convinience');
+	console.log("");
 	console.log("Configure your OSC-Clients like this:")
 	if(addresses.length == 0)
 	{
-		console.log("  Host:         [can't find your ip - sorry]");
+		console.log("Host:         [can't find your ip - sorry]");
 	}
 	else if(addresses.length == 1)
 	{
-		console.log("  Host:         ", addresses[0].address);
+		console.log("Host:         ", addresses[0].address);
 	}
 	else
 	{
@@ -125,11 +133,11 @@ function showWelcomeMessage()
 		});
 	}
 
-	console.log("  Outgoing Port:", config.receivePort);
+	console.log("Outgoing Port:", config.receivePort);
 	console.log("");
 
 	// print some info about the webui
-	console.log("  To see the WebUi, go to http://127.0.0.1:" + config.webUiPort);
+	console.log("To see the WebUi, go to http://127.0.0.1:" + config.webUiPort);
 	console.log("");
 }
 
@@ -138,7 +146,7 @@ function showWelcomeMessage()
 // advertise our osc-service
 function advertiseService()
 {
-	console.log("Advertising our relay via Zeroconf");
+	logger.log('info', "Advertising our relay via Zeroconf");
 
 	// advertise our relay service
 	mdns.createAdvertisement(
@@ -167,7 +175,7 @@ function startGuestBrowser()
 	var mdnsBrowser = mdns.createBrowser(mdns.udp('osc'));
 
 	// wait for ZeroConf events
-	console.log('looking for new guests using ZeroConf');
+	logger.log('info', 'looking for new guests using ZeroConf');
 
 	// on servide up
 	mdnsBrowser.on('serviceUp', function(service)
@@ -213,7 +221,7 @@ function startGuestBrowser()
 					delete guests[service.name];
 
 					// print a message
-					console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+					logger.log('info', 'guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 
 					// notify the web-ui clients
 					updateWebUi('timeout');
@@ -239,7 +247,7 @@ function startGuestBrowser()
 				delete guests[service.name];
 
 				// print a message
-				console.log('guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+				logger.log('info', 'guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 
 				// notify the web-ui clients
 				updateWebUi('timeout');
@@ -250,13 +258,13 @@ function startGuestBrowser()
 		guests[service.name] = guest;
 
 		// print another message
-		console.log('guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
+		logger.log('info', 'guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
 
 		// notify the web-ui clients
 		updateWebUi('guest-up');
 
 		// brief the new guest with our internal state
-		console.log('  briefing new guest with '+Object.keys(state).length+' values')
+		logger.log('info', '  briefing new guest with '+Object.keys(state).length+' values')
 		var buffer = generateBundleBuffer();
 		esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 	});
@@ -276,7 +284,7 @@ function startGuestBrowser()
 		clearTimeout(guest.timeout);
 
 		// print a message
-		console.log('guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+		logger.log('info', 'guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 
 		// notify the web-ui clients
 		updateWebUi('guest-down');
@@ -327,7 +335,7 @@ function startWebUi()
 		// event handlers
 		socket.on('newPreset', function(name)
 		{
-			console.log('writing new preset with name', name, 'and', Object.keys(state).length, 'values');
+			logger.log('info', 'writing new preset with name', name, 'and', Object.keys(state).length, 'values');
 
 			var elements =  {};
 			for(var address in state)
@@ -338,7 +346,7 @@ function startWebUi()
 			var jsonStr = JSON.stringify(elements);
 			fs.writeFile(path.join('presets', name+'.json'), jsonStr, {encoding: 'utf8'}, function(err) {
 				if(err)
-					return console.log('error writing file', err);
+					return logger.log('error', 'error writing file', err);
 
 				if(presets.indexOf(name) === -1)
 					presets.push(name);
@@ -373,12 +381,12 @@ function startLessCssRecompiler()
 
 	function recompile(lessfile, cssfile)
 	{
-		console.log('lesscss recompile '+lessfile+' -> '+cssfile);
+		logger.log('debug', 'lesscss recompile '+lessfile+' -> '+cssfile);
 
 		fs.readFile(lessfile, {encoding: 'utf8'}, function(err, lesscode)
 		{
 			if(err)
-				return console.log('lesscss error: unable to read less file ' + lessfile, err)
+				return logger.log('error', 'lesscss error: unable to read less file ' + lessfile, err)
 
 			less.render(
 				lesscode,
@@ -389,11 +397,11 @@ function startLessCssRecompiler()
 				},
 				function(err, csscode) {
 					if(err)
-						return console.log('lesscss error', less.formatError(err))
+						return logger.log('error', 'lesscss error', less.formatError(err))
 
 					fs.writeFile(cssfile, csscode, {encoding: 'utf8'}, function(err) {
 						if(err)
-							return console.log('unable to write css file ' + cssfile, err);
+							return logger.log('error', 'unable to write css file ' + cssfile, err);
 					});
 				}
 			);
@@ -447,7 +455,7 @@ function buildWebUiUpdateBundle() {
 
 function loadPresets()
 {
-	console.log('loading presets');
+	logger.log('info', 'loading presets');
 	fs.readdir('presets/', function(err, files) {
 		files.forEach(function(file) {
 			path.parse
@@ -459,7 +467,7 @@ function loadPresets()
 			}
 		})
 
-		console.log('loaded', presets.length,'presets: ', presets);
+		logger.log('info', 'loaded', presets.length,'presets: ', presets);
 	});
 }
 
@@ -480,16 +488,20 @@ function startRelay()
 		try {
 			var message = osc.fromBuffer(buffer);
 		} catch (e) {
-			return console.log('message parse error', e);
+			return logger.log('warn', 'message parse error', e);
 		}
 
+		// catch bogus messages
+		if(!message.address)
+			logger.log('warn', 'received bogus message from '+rinfo.address+' (no address)');
+
 		// print some message
-		console.log('received message from '+rinfo.address+':', message.address, 'with', (message.args ? message.args.length : 0), 'arg(s)');
+		logger.log('debug', 'received message from '+rinfo.address+':', message.address, 'with', (message.args ? message.args.length : 0), 'arg(s)');
 
 		// test if the message matches one of the filters
 		var filterResult = isMessageFiltered(message.address);
 		if(filterResult !== false)
-			return console.log('   filtered -> ', filterResult);
+			return logger.log('debug', '   filtered -> ', filterResult);
 
 		// clear previous timeouts
 		if(state[message.address])
@@ -504,7 +516,7 @@ function startRelay()
 		{
 			state.timeout = setTimeout(function()
 			{
-				console.log('removing message', message.address, 'from internal state');
+				logger.log('info', 'removing message', message.address, 'from internal state');
 				delete state[message.address];
 			}, config.valueStoreTimeout * 1000)
 		}
@@ -524,13 +536,13 @@ function startRelay()
 						delete guests[name];
 
 						// print a message
-						console.log('guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+						logger.log('info', 'guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 					}, config.guestTimeout * 1000);
 				}
 			}
 
 			// print a message
-			console.log('   forwarding to "'+name+'": '+guest.address);
+			logger.log('debug', '   forwarding to "'+name+'": '+guest.address);
 
 			// and submit the data
 			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
@@ -549,7 +561,7 @@ function startRelay()
 	if(config.broadcastInterval > 0 && Object.keys(config.staticGuests).length > 0)
 	{
 		setInterval(function() {
-			console.log('broadcasting complete internal state to static guests');
+			logger.log('info', 'broadcasting complete internal state to static guests');
 			var buffer = generateBundleBuffer();
 
 			// iterare static guests
