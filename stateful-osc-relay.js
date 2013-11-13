@@ -503,22 +503,9 @@ function startRelay()
 		if(filterResult !== false)
 			return logger.log('debug', '   filtered -> ', filterResult);
 
-		// clear previous timeouts
-		if(state[message.address])
-			clearTimeout(state[message.address].timeout);
-
 		// save the message and its arguments in our internal state array
 		state[message.address] = {
 			args: message.args
-		}
-
-		if(config.valueStoreTimeout > 0)
-		{
-			state[message.address].timeout = setTimeout(function()
-			{
-				logger.log('info', 'removing message', message.address, 'from internal state');
-				delete state[message.address];
-			}, config.valueStoreTimeout * 1000)
 		}
 
 		// forward message to one of the guests
