@@ -83,14 +83,19 @@ $(function() {
 					.appendTo($tbody)
 					.append($('<td>').text(guest.n))
 					.append($('<td>').text(guest.a + ':' + guest.p))
-					.append($('<td>').text(  sourceNames[guest.s]  ));
+					.append($('<td>').text(
+						sourceNames[guest.s]
+					))
+					.append($('<td>').text(
+						moment(guest.t).fromNow()
+					));
 			};
 		}
 		else {
 			$('<tr>')
 				.appendTo($tbody)
 				.append(
-					$('<td colspan="3" class="no-guests">')
+					$('<td colspan="4" class="no-guests">')
 						.text('Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?')
 				)
 		}

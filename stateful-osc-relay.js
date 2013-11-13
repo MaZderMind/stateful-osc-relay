@@ -397,7 +397,8 @@ function buildWebUiUpdateBundle() {
 			a: guest.address,
 			p: guest.port,
 			s: 'z',
-			n: name
+			n: name,
+			t: guest.lastSeen.getTime()
 		})
 	}
 
