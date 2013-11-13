@@ -211,22 +211,7 @@ function startGuestBrowser()
 		if(guests[service.name])
 		{
 			// update guest timeout
-			var guest = guests[service.name];
-
-			if(config.guestTimeout > 0)
-			{
-				clearTimeout(guest.timeout);
-				guest.timeout = setTimeout(function() {
-					// save state for a short time and delete from guest hash
-					delete guests[service.name];
-
-					// print a message
-					logger.log('info', 'guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
-
-					// notify the web-ui clients
-					updateWebUi('timeout');
-				}, config.guestTimeout * 1000);
-			}
+			guests[service.name].lastSeen = new Date();
 
 			// do nothing more
 			return;
@@ -235,23 +220,8 @@ function startGuestBrowser()
 		// build a new guest record
 		var guest = {
 			address: service.addresses[0],
-			port: service.port
-		}
-
-		if(config.guestTimeout > 0)
-		{
-			// timeout function
-			guest.timeout = setTimeout(function() {
-				// save state for a short time and delete from guest hash
-				var guest = guests[service.name];
-				delete guests[service.name];
-
-				// print a message
-				logger.log('info', 'guest "'+service.name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
-
-				// notify the web-ui clients
-				updateWebUi('timeout');
-			}, config.guestTimeout * 1000)
+			port: service.port,
+			lastSeen: new Date()
 		}
 
 		// save the guest-record in the guests-hash
@@ -279,9 +249,6 @@ function startGuestBrowser()
 		// save state for a short time and delete from guest hash
 		var guest = guests[service.name];
 		delete guests[service.name];
-
-		// clear the timeout
-		clearTimeout(guest.timeout);
 
 		// print a message
 		logger.log('info', 'guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
@@ -511,23 +478,6 @@ function startRelay()
 		// forward message to one of the guests
 		function forward(name, guest)
 		{
-			// if this is the sending guest
-			if(guest.address == rinfo.address)
-			{
-				// update the timeout
-				if(config.guestTimeout > 0)
-				{
-					clearTimeout(guest.timeout);
-					guest.timeout = setTimeout(function() {
-						// save state for a short time and delete from guest hash
-						delete guests[name];
-
-						// print a message
-						logger.log('info', 'guest "'+name+'"  timeouted after ', config.guestTimeout, 'seconds:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
-					}, config.guestTimeout * 1000);
-				}
-			}
-
 			// print a message
 			logger.log('debug', '   forwarding to "'+name+'": '+guest.address);
 
@@ -539,9 +489,17 @@ function startRelay()
 		for(var name in config.staticGuests)
 			forward(name, staticGuests[name]);
 
-		// iterare dynmaic guests
+		// iterare dynamic guests
 		for(var name in guests)
+		{
 			forward(name, guests[name]);
+
+			// we have no way in determining which guest this message came from (-> random udp sending ports)
+			// but we can update the lastSeen stamp on all guests on that ip address
+			//  TODO test if we can somehow target this with the mdsn module
+			if(guests[name].address == rinfo.address)
+				guests[name].lastSeen = new Date();
+		}
 	});
 
 	// periodic retransmit/broadcast

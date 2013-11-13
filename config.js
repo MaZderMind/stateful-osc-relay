@@ -13,9 +13,6 @@ module.exports = {
 		//'Name of Device': {address: 192.168.178.31, port: 10002},
 	},
 
-	// time aftze the last received announcement or message after which zeroconf-advertised guests are dropped. set to 0 to disable.
-	guestTimeout: 60*60*12, // 12 hours
-
 	messageFilter: {
 		// filter our messages that just consists of /[0-9] which are usually TouchOSC page change messages
 		pageSwap: /^\/[0-9]+$/i,
