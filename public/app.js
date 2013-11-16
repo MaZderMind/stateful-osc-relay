@@ -6,6 +6,10 @@ $(function() {
 		$tabs = $('.tab'),
 		sourceNames = {z: 'Zeroconf', s: 'Static'};
 
+	if('ontouchstart' in document) {
+		$('body').removeClass('no-touch').addClass('touch');
+	}
+
 	// Navigation
 	$nav.on('click', 'a', function() {
 		var
@@ -50,11 +54,20 @@ $(function() {
 
 
 	// preset buttons
-	$('.presets-tab').on('touchstart click', '.tile', function(e) {
-		var $tile = $(this);
+	var longtouch;
+	$('.presets-tab').on('click', '.tile', function(e) {
+		var
+			$tile = $(this),
+			title = $.trim($tile.text());
 
 		e.preventDefault();
-		if($tile.hasClass('create'))
+		if($(e.target).hasClass('delete'))
+		{
+			var really = confirm('Do you really want to delete this Preset: '+title);
+			if(really)
+				socket.emit('deletePreset', title);
+		}
+		else if($tile.hasClass('create'))
 		{
 			// using a simple prompt is good for mobile devices and okay for desktop systems
 			var promptedName = prompt('Choose a new Preset-Name');
@@ -63,8 +76,21 @@ $(function() {
 		}
 		else
 		{
-			socket.emit('loadPreset', $.trim($tile.text()));
+			socket.emit('loadPreset', title);
 		}
+	}).on('touchstart', function(e) {
+		var $tile = $(e.target).closest('.tile');
+
+		if($tile.hasClass('create'))
+			return;
+
+		longtouch = setTimeout(function() {
+
+			$tile.find('.delete').trigger('click');
+
+		}, 1000 /*longtouch timeout*/);
+	}).on('touchend', function() {
+		clearTimeout(longtouch);
 	});
 
 
@@ -94,7 +120,7 @@ $(function() {
 					))
 					.append($('<td>').text(
 						moment(guest.t).fromNow()
-					));
+					)).attr('title', moment(guest.t).calendar());
 			};
 		}
 		else {
@@ -126,7 +152,7 @@ $(function() {
 					stateClasses[state]
 				)
 				.appendTo($presetsContainer)
-				.children('p')
+				.find('p')
 					.text(preset);
 		}
 

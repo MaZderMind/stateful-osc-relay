@@ -1,6 +1,15 @@
 @import "variables.less";
 @import "animate/animate.less";
 
+.no-select() {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
 // main-nav padding to line up with headline
 .main-nav {
 	padding-top: 20px;
@@ -39,6 +48,24 @@
 }
 
 // presets tab
+body.no-touch .presets-tab
+{
+	.tile {
+
+		.delete:hover {
+			text-shadow: 0px 0px 10px white;
+		}
+
+		&:hover .delete {
+			display: block;
+		}
+
+		&.create .delete {
+			display: none;
+		}
+	}
+}
+
 .presets-tab
 {
 	.tile {
@@ -51,7 +78,9 @@
 
 		display: table;
 
-		p {
+		.no-select();
+
+		.inner {
 			display: table-cell;
 			vertical-align: middle;
 
@@ -60,21 +89,21 @@
 			color: @btn-primary-color;
 			background-color: @btn-primary-bg;
 			border-radius: @border-radius-base;
+
+			position: relative;
+		}
+
+		.delete {
+			font-size: 2em;
+			position: absolute;
+			top: 5px;
+			right: 5px;
+			display: none;
 		}
 
 		&.create {
 			font-style: italic;
 		}
-
-		/*
-		&.new {
-			background-color: red;
-		}
-
-		&.used {
-			background-color: green;
-		}
-		*/
 
 		// min-width: Small screen / tablet
 		@media (min-width: @screen-sm-min) {

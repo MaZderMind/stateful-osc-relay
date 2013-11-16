@@ -18,7 +18,7 @@
 		<script src="app.js"></script>
 	</head>
 
-	<body>
+	<body class="no-touch">
 		<div class="container">
 			<div class="row">
 
@@ -58,8 +58,15 @@
 					<h2>Presets</h2>
 					<div class="row">
 
+						<div class="alert alert-info alert-dismissable">
+							<strong>Hint:</strong> Touch longer to delete a preset
+						</div>
+
 						<div class="col-lg-3 col-sm-4 col-xs-6   tile create">
-							<p>Save current state as preset</p>
+							<div class="inner">
+								<p>Save current state as preset</p>
+								<div class="delete glyphicon glyphicon-remove-circle"></div>
+							</div>
 						</div>
 
 					</div>

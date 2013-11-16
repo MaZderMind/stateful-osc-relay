@@ -1,8 +1,7 @@
 TODO
 
-presets
- - delete via webui
- - monitor folder
+devices
+- mobile version of table
 
 show internal state in webui
   - delete messages

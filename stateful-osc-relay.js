@@ -316,6 +316,19 @@ function startWebUi()
 			})
 		});
 
+		socket.on('deletePreset', function(name)
+		{
+			logger.log('info', 'deleting preset with name', name);
+
+			fs.unlink(path.join('presets', name+'.json'), function(err) {
+				if(err)
+					return logger.log('error', 'error deleting preset-file', err);
+
+				delete presets[name];
+
+				updateWebUi('deleted preset');
+			})
+		});
 
 		socket.on('loadPreset', function(name)
 		{
