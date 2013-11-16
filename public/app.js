@@ -1,6 +1,6 @@
 $(function() {
 	var
-		$tbody = $('.guests-tab tbody'),
+		$guestsTbody = $('.guests-tab tbody'),
 		$presetsContainer = $('.presets-tab .row'),
 		$nav = $('.main-nav'),
 		$tabs = $('.tab'),
@@ -94,9 +94,34 @@ $(function() {
 	});
 
 
+	$('.state-table').on('click', 'input', function() {
+		var
+			$other = $('.state-table tbody input'),
+			$all = $('.state-table input.all'),
+			$btn = $('.state-table button'),
+			anyChecked = (0 == $other.filter(':checked').length);
 
-	$('.state-tab').on('click', 'input', function() {
-		
+		if($(this).hasClass('all'))
+		{
+			$other
+				.prop('checked', false);
+
+			$all
+				.prop('checked', true)
+				.prop('disabled', true);
+
+			$btn
+				.text($btn.data('cltext'))
+		}
+		else
+		{
+			$all
+				.prop('checked', anyChecked)
+				.prop('disabled', anyChecked);
+
+			$btn
+				.text(anyChecked ? $btn.data('cltext') : $btn.data('rmtext'))
+		}
 	});
 
 
@@ -110,14 +135,14 @@ $(function() {
 		console.log('update because of', reason, bundle);
 
 		// clean and re-fill guest table
-		$tbody.find('> tr').remove();
+		$guestsTbody.find('> tr').remove();
 		if(bundle.g.length > 0)
 		{
 			for(var i = 0; i < bundle.g.length; i++) {
 				var guest = bundle.g[i];
 
 				$('<tr>')
-					.appendTo($tbody)
+					.appendTo($guestsTbody)
 					.append($('<td>').text(guest.n))
 					.append($('<td>').html(guest.a + '<wbr>:' + guest.p))
 					.append($('<td class="hidden-xs">').text(
@@ -132,13 +157,13 @@ $(function() {
 			var t = 'Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?';
 
 			$('<tr>')
-				.appendTo($tbody)
+				.appendTo($guestsTbody)
 				.append(
 					$('<td colspan="4" class="no-guests hidden-xs">').text(t)
 				);
 
 			$('<tr>')
-				.appendTo($tbody)
+				.appendTo($guestsTbody)
 				.append(
 					$('<td colspan="2" class="no-guests visible-xs">').text(t)
 				);
