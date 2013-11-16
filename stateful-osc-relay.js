@@ -305,6 +305,7 @@ function startWebUi()
 			logger.log('info', 'writing new preset with name', name, 'and', Object.keys(state).length, 'values');
 
 			var jsonStr = JSON.stringify(state, null, "\t");
+			console.log(jsonStr);
 			fs.writeFile(path.join('presets', name+'.json'), jsonStr, {encoding: 'utf8'}, function(err) {
 				if(err)
 					return logger.log('error', 'error writing preset-file', err);
@@ -355,6 +356,7 @@ function startWebUi()
 				for(var guestname in config.staticGuests)
 				{
 					var guest = config.staticGuests[guestname];
+					logger.log('debug', '   forwarding to "'+guestname+'": '+guest.address);
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
 
@@ -362,6 +364,7 @@ function startWebUi()
 				for(var guestname in guests)
 				{
 					var guest = guests[guestname];
+					logger.log('debug', '   forwarding to "'+guestname+'": '+guest.address);
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
 
@@ -369,6 +372,21 @@ function startWebUi()
 				presets[name] = 'used';
 				updateWebUi('preset used');
 			})
+		});
+
+		socket.on('removeState', function(messages) {
+			logger.log('info', 'removing', messages.length || 'all', 'of', Object.keys(state).length, 'messages from internal state');
+
+			if(messages.length)
+			{
+				for (var i = 0, l = messages.length; i < l; i++) {
+					delete state[messages[i]];
+				};
+			}
+			else state = [];
+
+			updateWebUi('removed message');
+			logger.log('debug', Object.keys(state).length, 'messages in internal state left');
 		});
 	});
 
@@ -523,6 +541,9 @@ function startRelay()
 		if(filterResult !== false)
 			return logger.log('debug', '   filtered -> ', filterResult);
 
+		// message is new - inform WebUi
+		var isNew = !state[message.address];
+
 		// save the message and its arguments in our internal state array
 		state[message.address] = {
 			args: message.args
@@ -553,6 +574,9 @@ function startRelay()
 			if(guests[name].address == rinfo.address)
 				guests[name].lastSeen = new Date();
 		}
+
+		if(isNew)
+			updateWebUi('new message');
 	});
 
 	// dynamic guests get their brief when they come up. with static guests we don't know ehn they go down or up,

@@ -1,16 +1,22 @@
 $(function() {
-	var
-		$guestsTbody = $('.guests-tab tbody'),
-		$presetsContainer = $('.presets-tab .row'),
-		$nav = $('.main-nav'),
-		$tabs = $('.tab'),
-		sourceNames = {z: 'Zeroconf', s: 'Static'};
 
 	if('ontouchstart' in document) {
 		$('body').removeClass('no-touch').addClass('touch');
 	}
 
-	// Navigation
+	///// Socket Communications /////
+	var socket = io.connect(window.location.protocol+'//'+window.location.host, {
+		'reconnection limit': 5000,
+		'sync disconnect on unload': true
+	});
+
+
+
+
+	///// Navigation /////
+	var
+		$nav = $('.main-nav'),
+		$tabs = $('.tab');
 	$nav.on('click', 'a', function() {
 		var
 			$a = $(this),
@@ -53,7 +59,9 @@ $(function() {
 
 
 
-	// preset buttons
+
+
+	///// Presets /////
 	var longtouch;
 	$('.presets-tab').on('click', '.tile', function(e) {
 		var
@@ -94,11 +102,17 @@ $(function() {
 	});
 
 
-	$('.state-table').on('click', 'input', function() {
+
+
+	///// State /////
+	var
+		$stable = $('.state-table'),
+		$all = $stable.find('input.all'),
+		$btn = $stable.find('button');
+
+	$stable.on('click', 'input', function() {
 		var
-			$other = $('.state-table tbody input'),
-			$all = $('.state-table input.all'),
-			$btn = $('.state-table button'),
+			$other = $stable.find('tbody input'),
 			anyChecked = (0 == $other.filter(':checked').length);
 
 		if($(this).hasClass('all'))
@@ -124,25 +138,38 @@ $(function() {
 		}
 	});
 
-
-	// Socket communication
-	var socket = io.connect(window.location.protocol+'//'+window.location.host, {
-		'reconnection limit': 5000,
-		'sync disconnect on unload': true
+	$btn.on('click', function() {
+		socket.emit('removeState', 
+			$stable
+				.find('tbody input:checked')
+				.map(function() {
+					return $(this).val();
+				})
+				.get()
+		);
 	});
+
+
+	///// State-Update /////
+	var
+		$gtbody = $('.guests-tab tbody'),
+		sourceNames = {z: 'Zeroconf', s: 'Static'};
 
 	socket.on('update', function(reason, bundle) {
 		console.log('update because of', reason, bundle);
 
-		// clean and re-fill guest table
-		$guestsTbody.find('> tr').remove();
+
+
+
+		///// Guests /////
+		$gtbody.find('> tr').remove();
 		if(bundle.g.length > 0)
 		{
 			for(var i = 0; i < bundle.g.length; i++) {
 				var guest = bundle.g[i];
 
 				$('<tr>')
-					.appendTo($guestsTbody)
+					.appendTo($gtbody)
 					.append($('<td>').text(guest.n))
 					.append($('<td>').html(guest.a + '<wbr>:' + guest.p))
 					.append($('<td class="hidden-xs">').text(
@@ -157,20 +184,26 @@ $(function() {
 			var t = 'Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?';
 
 			$('<tr>')
-				.appendTo($guestsTbody)
+				.appendTo($gtbody)
 				.append(
 					$('<td colspan="4" class="no-guests hidden-xs">').text(t)
 				);
 
 			$('<tr>')
-				.appendTo($guestsTbody)
+				.appendTo($gtbody)
 				.append(
 					$('<td colspan="2" class="no-guests visible-xs">').text(t)
 				);
 		}
 
-		// clear and re-fill preset list
-		var $tileTemplate = $presetsContainer.find('.tile.create');
+
+
+
+		///// Presets /////
+		var
+			$presetsContainer = $('.presets-tab .row'),
+			$tileTemplate = $presetsContainer.find('.tile.create');
+
 		$presetsContainer.find('.tile:not(.create)').remove();
 
 		var stateClasses = {
@@ -194,6 +227,58 @@ $(function() {
 		}
 
 
-		console.log('messagges', bundle.m);
+
+
+		///// State /////
+		var
+			$stbody = $stable.find('tbody'),
+			messages = bundle.m;
+
+		if(messages.length == 0)
+		{
+			if($stbody.find('.no-messages').length == 0)
+			{
+				$('<tr class="no-messages">')
+					.append(
+						$('<td colspan="2">').text('Currently no messages are in the internal storage. Move some sliders or load a preset.')
+					)
+					.appendTo($stbody);
+			}
+		}
+		else
+		{
+			$stbody.find('.no-messages').remove();
+		}
+
+		$stbody.find('tr:not(.no-messages)').each(function() {
+			var
+				$tr = $(this),
+				message = $tr.find('input').prop('value'),
+				idx = $.inArray(message, messages);
+
+			if(idx == -1)
+			{
+				// visible message is not in messages array anymore
+				$tr.find('input').prop('checked', true).trigger('click');
+				$tr.remove();
+			}
+			else
+			{
+				// visible message is in messages array
+				messages.splice(idx, 1);
+			}
+		});
+
+		$.each(messages, function(i, message) {
+			$('<tr>')
+				.append(
+					$('<td>').append(
+						$('<input type="checkbox">')
+							.attr('value', message)
+					),
+					$('<td>').text(message)
+				)
+				.appendTo($stbody);
+		});
 	});
 });
