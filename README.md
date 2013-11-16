@@ -12,24 +12,27 @@ This implementation of an OSC Relay adds some state to the whole OSC chain. It a
 ## About Zeroconf & Static Guests
 Zeroconf is a way to auto-discover devices that offer a specific service such as OSC-Capable devices. If your device or software does not announce itsself als such via Zeroconf, you can configure its adress and port as static guests in the config.js-File. As none-Zeroconf-Devices doesn't announce their availability to the relay, they can't get an automated briefing from it. The relay regularly (default: every 15 minutes) broadcasts its internal state to all staticly configured guests to overcome this.
 
-## About Timeouts
-The relay has various timeouts directed at not flooding your network. First of all if a zeroconf discovered gues is not active for guestTimeout seconds (default: 12 hours), it will be removed from the list of avaiable guests. Second, messages in the internal state are discarded after some period of time (default: one hour). All Intervals and Timeouts can be configured and disabled in the config.
-
 ## About Filters
 Some Messages are nonsense. TouchOSC regularly submits a ``/ping``-Message and also transmits a ```/page/[0-9]+``` message each time you switch to another page in the gui. Such messages can be filtered via filter-rules in the configuration.
+
+## About the WebUI
+The Relay gives you a Mobile-Compatible Realtime-Web-Gui that gives you insight and control over its operation. You can see all currently connected Receivers ("Guests"), Save and Restore Presets and Manage the internal State of the Relay. If you want another Feature exposed in the WebUI, just drop me a line or -better- [file an Issue](https://github.com/MaZderMind/stateful-osc-relay/issues).
 
 ## Getting & Running it
 Install [NodeJS](http://nodejs.org/)
 Run the following command on the Terminal:
 ```
-git clone https://github.com/MaZderMind/stateful-osc-relay.git
+wget https://github.com/MaZderMind/stateful-osc-relay/archive/master.zip -O stateful-osc-relay.zip
+unzip stateful-osc-relay.zip
 cd stateful-osc-relay
 npm install
 node stateful-osc-relay.js
 ```
+Now the relay should be up and running, announcing itsself via Zeroconf and finding other Devices & Programs that support OSC.
 
-Now the relay should be up and announce itsself via Zeroconf.
-
+## Example Setup
+ The Example-Setup I tested the Relay in is as follows:
+ One Mac with the Relay and Osculator on it. Two iOS-Devices with TouchOSC on them. All should work out of the box. Set the Relay as Target in the TouchOSC app. The Relay finds Osculator automatically. Now configure Osculator to do what it's supposed to do.
 
 ## Contact
-If you have any questions just ask at peter@mazdermind.de.
+If you have any questions just ask at peter@mazdermind.de or drop me a short lone [https://alpha.app.net/MaZderMind](on ADN).
