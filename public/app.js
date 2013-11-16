@@ -114,22 +114,29 @@ $(function() {
 				$('<tr>')
 					.appendTo($tbody)
 					.append($('<td>').text(guest.n))
-					.append($('<td>').text(guest.a + ':' + guest.p))
-					.append($('<td>').text(
+					.append($('<td>').html(guest.a + '<wbr>:' + guest.p))
+					.append($('<td class="hidden-xs">').text(
 						sourceNames[guest.s]
 					))
-					.append($('<td>').text(
+					.append($('<td class="hidden-xs">').text(
 						moment(guest.t).fromNow()
 					)).attr('title', moment(guest.t).calendar());
 			};
 		}
 		else {
+			var t = 'Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?';
+
 			$('<tr>')
 				.appendTo($tbody)
 				.append(
-					$('<td colspan="4" class="no-guests">')
-						.text('Currently no guests are visible via Zeroconf. Maybe they need to be configured as static guests?')
-				)
+					$('<td colspan="4" class="no-guests hidden-xs">').text(t)
+				);
+
+			$('<tr>')
+				.appendTo($tbody)
+				.append(
+					$('<td colspan="2" class="no-guests visible-xs">').text(t)
+				);
 		}
 
 		// clear and re-fill preset list

@@ -37,17 +37,21 @@
 		table-layout: fixed;
 
 		th.ipv4 { width: 180px; }
+		th.ipv4 { width: 180px; }
 		th.source { width: 100px; }
 		th.time { width: 140px; }
 
 		td.no-guests {
 			font-style: italic;
 			text-align: center;
+
+			background-color: @table-bg-accent;
 		}
 	}
 }
 
 // presets tab
+/*
 body.no-touch .presets-tab
 {
 	.tile {
@@ -65,9 +69,15 @@ body.no-touch .presets-tab
 		}
 	}
 }
+*/
 
 .presets-tab
+
 {
+	.no-touch & .longtouch-hint {
+		display: none;
+	}
+
 	.tile {
 		@padding: 20px;
 
@@ -93,16 +103,28 @@ body.no-touch .presets-tab
 			position: relative;
 		}
 
+		.no-touch &:hover .delete {
+			display: block;
+		}
+
 		.delete {
 			font-size: 2em;
 			position: absolute;
 			top: 5px;
 			right: 5px;
 			display: none;
+
+			.no-touch &:hover {
+				text-shadow: 0px 0px 10px white;
+			}
 		}
 
 		&.create {
 			font-style: italic;
+
+			.delete {
+				display: none;
+			}
 		}
 
 		// min-width: Small screen / tablet
