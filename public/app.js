@@ -95,6 +95,11 @@ $(function() {
 
 
 
+	$('.state-tab').on('click', 'input', function() {
+		
+	});
+
+
 	// Socket communication
 	var socket = io.connect(window.location.protocol+'//'+window.location.host, {
 		'reconnection limit': 5000,
@@ -163,5 +168,7 @@ $(function() {
 					.text(preset);
 		}
 
+
+		console.log('messagges', bundle.m);
 	});
 });

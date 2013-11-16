@@ -37,7 +37,6 @@
 		table-layout: fixed;
 
 		th.ipv4 { width: 180px; }
-		th.ipv4 { width: 180px; }
 		th.source { width: 100px; }
 		th.time { width: 140px; }
 
@@ -51,26 +50,6 @@
 }
 
 // presets tab
-/*
-body.no-touch .presets-tab
-{
-	.tile {
-
-		.delete:hover {
-			text-shadow: 0px 0px 10px white;
-		}
-
-		&:hover .delete {
-			display: block;
-		}
-
-		&.create .delete {
-			display: none;
-		}
-	}
-}
-*/
-
 .presets-tab
 
 {
@@ -141,5 +120,15 @@ body.no-touch .presets-tab
 		@media (min-width: @screen-lg-min) {
 			height: 189px;
 		}
+	}
+}
+
+// state tab
+.state-tab {
+	table {
+		table-layout: fixed;
+
+		th.action { width: 25px; }
+		th.message div { padding-top: 12px; }
 	}
 }

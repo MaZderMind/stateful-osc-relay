@@ -469,7 +469,8 @@ function buildWebUiUpdateBundle() {
 	return {
 		t: (new Date()).getTime(),
 		g: webGuests,
-		p: presets
+		p: presets,
+		m: Object.keys(state)
 	}
 }
 

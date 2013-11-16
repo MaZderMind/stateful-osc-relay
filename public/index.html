@@ -27,9 +27,12 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li class="nav-guests active"><a href="#guests">Guests</a></li>
 						<li class="nav-presets"><a href="#presets">Presets</a></li>
+						<li class="nav-state"><a href="#state">Internal State</a></li>
+						<!--
 						<li class="nav-config"><a href="#config">Config</a></li>
 						<li class="nav-messages"><a href="#messages">Message I/O</a></li>
 						<li class="nav-log"><a href="#log">Log</a></li>
+						-->
 					</ul>
 				</div><!-- col-sm-3 main-nav -->
 
@@ -72,6 +75,42 @@
 					</div>
 
 				</div><!-- col-sm-9 presets-tab tab -->
+
+
+				<div class="col-sm-9 state-tab tab">
+
+					<h2>Internal State</h2>
+					<table class="table table-striped state-table">
+						<thead>
+							<tr>
+								<th class="action">
+									<input type="checkbox" checked disabled>
+								</th>
+								<th class="message">
+									<button type="button" class="btn btn-danger pull-right">Clear</button>
+									<div>Message</div>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><input type="checkbox"></td>
+								<td>/foo/bar/1</td>
+							</tr>
+							<tr>
+								<td><input type="checkbox"></td>
+								<td>/foo/bar/2</td>
+							</tr>
+							<tr>
+								<td><input type="checkbox"></td>
+								<td>/foo/bar/3</td>
+							</tr>
+						</tbody>
+					</table>
+
+
+
+				</div><!-- col-sm-9 state-tab tab -->
 
 
 			</div><!-- row -->
