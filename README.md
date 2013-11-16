@@ -18,6 +18,12 @@ Some Messages are nonsense. TouchOSC regularly submits a ``/ping``-Message and a
 ## About the WebUI
 The Relay gives you a Mobile-Compatible Realtime-Web-Gui that gives you insight and control over its operation. You can see all currently connected Receivers ("Guests"), Save and Restore Presets and Manage the internal State of the Relay. If you want another Feature exposed in the WebUI, just drop me a line or -better- [file an Issue](https://github.com/MaZderMind/stateful-osc-relay/issues).
 
+<img src="doc/guests.png" width="400" />
+<img src="doc/presets.png" width="400" />
+<img src="doc/state.png" width="400" />
+<img src="doc/iphone-guests.jpg" width="200" />
+<img src="doc/iphone-presets.jpg" width="200" />
+
 ## Getting & Running it
 Install [NodeJS](http://nodejs.org/)
 Run the following command on the Terminal:
@@ -35,4 +41,4 @@ Now the relay should be up and running, announcing itsself via Zeroconf and find
  One Mac with the Relay and Osculator on it. Two iOS-Devices with TouchOSC on them. All should work out of the box. Set the Relay as Target in the TouchOSC app. The Relay finds Osculator automatically. Now configure Osculator to do what it's supposed to do.
 
 ## Contact
-If you have any questions just ask at peter@mazdermind.de or drop me a short lone [https://alpha.app.net/MaZderMind](on ADN).
+If you have any questions just ask at peter@mazdermind.de or drop me a short line [https://alpha.app.net/MaZderMind](on ADN).
