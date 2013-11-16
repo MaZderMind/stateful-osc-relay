@@ -45,18 +45,19 @@ $(function() {
 	}
 
 	// By Permalink
-	if(window.location.hash)
-	{
-		var target = window.location.hash.substr(1);
-		navigateTo(target);
-	}
+	$(window).on('hashchange', function() {
+		if(window.location.hash)
+		{
+			var target = window.location.hash.substr(1);
+			navigateTo(target);
+		}
+	}).trigger('hashchange');
 
 	// By Cookie
 	if($.cookie('osc-nav'))
 	{
 		navigateTo($.cookie('osc-nav'));
 	}
-
 
 
 
