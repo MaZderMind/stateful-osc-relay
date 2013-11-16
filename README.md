@@ -18,11 +18,11 @@ Some Messages are nonsense. TouchOSC regularly submits a ``/ping``-Message and a
 ## About the WebUI
 The Relay gives you a Mobile-Compatible Realtime-Web-Gui that gives you insight and control over its operation. You can see all currently connected Receivers ("Guests"), Save and Restore Presets and Manage the internal State of the Relay. If you want another Feature exposed in the WebUI, just drop me a line or -better- [file an Issue](https://github.com/MaZderMind/stateful-osc-relay/issues).
 
-<img src="doc/guests.png" width="400" />
-<img src="doc/presets.png" width="400" />
-<img src="doc/state.png" width="400" />
-<img src="doc/iphone-guests.jpg" width="200" />
-<img src="doc/iphone-presets.jpg" width="200" />
+<img src="doc/guests.png" width="350" />
+<img src="doc/presets.png" width="350" />
+<img src="doc/state.png" width="350" />
+<img src="doc/iphone-guests.jpg" width="175" />
+<img src="doc/iphone-presets.jpg" width="175" />
 
 ## Getting & Running it
 Install [NodeJS](http://nodejs.org/)
