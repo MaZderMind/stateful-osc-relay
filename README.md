@@ -41,4 +41,4 @@ Now the relay should be up and running, announcing itsself via Zeroconf and find
  One Mac with the Relay and Osculator on it. Two iOS-Devices with TouchOSC on them. All should work out of the box. Set the Relay as Target in the TouchOSC app. The Relay finds Osculator automatically. Now configure Osculator to do what it's supposed to do.
 
 ## Contact
-If you have any questions just ask at peter@mazdermind.de or drop me a short line [https://alpha.app.net/MaZderMind](on ADN).
+If you have any questions just ask at peter@mazdermind.de or drop me a short line [on ADN](https://alpha.app.net/MaZderMind).
