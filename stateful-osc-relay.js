@@ -454,7 +454,7 @@ function startLessCssRecompiler()
 					if(err)
 						return debug('lesscss error', less.formatError(err))
 
-					fs.writeFile(cssfile, csscode, {encoding: 'utf8'}, function(err) {
+					fs.writeFile(cssfile, csscode.css, {encoding: 'utf8'}, function(err) {
 						if(err)
 							return debug('unable to write css file ' + cssfile, err);
 					});
