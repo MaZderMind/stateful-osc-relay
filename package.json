@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": "Peter Körner <peter@mazdermind.de>",
   "description": "a stateful stateful-osc-relay",
-  "contributors": [ ],
+  "contributors": [],
   "bin": {
     "http-server": "./stateful-osc-relay-runner"
   },
@@ -20,15 +20,16 @@
     "server",
     "state"
   ],
-  "dependencies" : {
-    "osc-min": "*",
-    "mdns2": "2.1.x",
-    "node-static": "0.7.x",
-    "socket.io": "0.9.x",
-    "less": "1.5.x"
+  "dependencies": {
+    "debug": "^4.0.1",
+    "less": "^3.8.1",
+    "mdns": "^2.4.0",
+    "node-static": "^0.7.10",
+    "osc-min": "^1.1.1",
+    "socket.io": "^2.1.1"
   },
-  "license": "FreeBSD",
+  "license": "BSD-2-Clause-FreeBSD",
   "engines": {
-    "node": ">=0.10"
+    "node": ">=8.10"
   }
 }

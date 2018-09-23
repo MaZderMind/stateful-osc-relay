@@ -15,7 +15,7 @@ var
 	osc = require('osc-min'),
 
 	// the zeroconf/multicast module
-	mdns = require('mdns2'),
+	mdns = require('mdns'),
 
 	// http-module for a web-gui
 	http = require('http'),
@@ -35,9 +35,8 @@ var
 	// socket.io for realtime-communication over http
 	socketio = require('socket.io'),
 
-	// re-use the socket.io logger
-	Logger = require('socket.io/lib/logger'),
-	logger = new Logger();
+	// logging
+	debug = require('debug')('osc-relay'),
 
 	// communication port for web-clients
 	io = null,
@@ -55,7 +54,7 @@ var
 	state = {};
 
 
-logger.log('info', 'Starting up the System');
+debug('Starting up the System');
 
 // start monitoring local ip adresses
 updateLocalAdresses();
@@ -105,7 +104,7 @@ function updateLocalAdresses()
 		});
 	};
 
-	logger.log('info', 'enumerated', addresses.length, 'non-internal local ip adresses on', Object.keys(interfaces).length, 'network interfaces');
+	debug('enumerated', addresses.length, 'non-internal local ip adresses on', Object.keys(interfaces).length, 'network interfaces');
 }
 
 
@@ -114,7 +113,7 @@ function updateLocalAdresses()
 function showWelcomeMessage()
 {
 	// print that list and the configured port for the users convinience
-	logger.log('info', 'printing a nice message for the users convinience');
+	debug('printing a nice message for the users convinience');
 	console.log("");
 	console.log("Configure your OSC-Clients like this:")
 	if(addresses.length == 0)
@@ -146,7 +145,7 @@ function showWelcomeMessage()
 // advertise our osc-service
 function advertiseService()
 {
-	logger.log('info', "Advertising our relay via Zeroconf");
+	debug("Advertising our relay via Zeroconf");
 
 	// advertise our relay service
 	mdns.createAdvertisement(
@@ -175,7 +174,7 @@ function startGuestBrowser()
 	var mdnsBrowser = mdns.createBrowser(mdns.udp('osc'));
 
 	// wait for ZeroConf events
-	logger.log('info', 'looking for new guests using ZeroConf');
+	debug('looking for new guests using ZeroConf');
 
 	// on servide up
 	mdnsBrowser.on('serviceUp', function(service)
@@ -228,13 +227,13 @@ function startGuestBrowser()
 		guests[service.name] = guest;
 
 		// print another message
-		logger.log('info', 'guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
+		debug('guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
 
 		// notify the web-ui clients
 		updateWebUi('guest-up');
 
 		// brief the new guest with our internal state
-		logger.log('info', '  briefing new guest with '+Object.keys(state).length+' values')
+		debug('  briefing new guest with '+Object.keys(state).length+' values')
 		var buffer = generateBundleBuffer();
 		esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 	});
@@ -251,7 +250,7 @@ function startGuestBrowser()
 		delete guests[service.name];
 
 		// print a message
-		logger.log('info', 'guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
+		debug('guest "'+service.name+'" down:', guest.address, guest.port, '('+Object.keys(guests).length+' guests left)');
 
 		// notify the web-ui clients
 		updateWebUi('guest-down');
@@ -283,17 +282,6 @@ function startWebUi()
 	// launch a socket.io-communication channel ontop of the webserver
 	io = socketio.listen(srv);
 
-	io.configure(function()
-	{
-		io.enable('browser client minification');  // send minified client
-		io.enable('browser client gzip');          // gzip the file
-		io.set('log level', 2);                    // reduce logging
-		//srv.set("transports", ["xhr-polling"]);
-		//srv.set("polling duration", 10);
-		//srv.set("heartbeat interval", 15);
-		//srv.set("heartbeat timeout", 20);
-	});
-
 	io.sockets.on('connection', function(socket)
 	{
 		// brief fresh connected web-ui clients
@@ -302,13 +290,13 @@ function startWebUi()
 		// event handlers
 		socket.on('newPreset', function(name)
 		{
-			logger.log('info', 'writing new preset with name', name, 'and', Object.keys(state).length, 'values');
+			debug('writing new preset with name', name, 'and', Object.keys(state).length, 'values');
 
 			var jsonStr = JSON.stringify(state, null, "\t");
 			console.log(jsonStr);
 			fs.writeFile(path.join('presets', name+'.json'), jsonStr, {encoding: 'utf8'}, function(err) {
 				if(err)
-					return logger.log('error', 'error writing preset-file', err);
+					return debug('error writing preset-file', err);
 
 				if(!presets[name])
 					presets[name] = 'new';
@@ -319,11 +307,11 @@ function startWebUi()
 
 		socket.on('deletePreset', function(name)
 		{
-			logger.log('info', 'deleting preset with name', name);
+			debug('deleting preset with name', name);
 
 			fs.unlink(path.join('presets', name+'.json'), function(err) {
 				if(err)
-					return logger.log('error', 'error deleting preset-file', err);
+					return debug('error deleting preset-file', err);
 
 				delete presets[name];
 
@@ -333,17 +321,17 @@ function startWebUi()
 
 		socket.on('loadPreset', function(name)
 		{
-			logger.log('info', 'loading preset with name', name);
+			debug('loading preset with name', name);
 
 			fs.readFile(path.join('presets', name+'.json'), {encoding: 'utf8'}, function(err, data) {
 				if(err)
-					return logger.log('warn', 'error reading preset-file', err);
+					return debug('error reading preset-file', err);
 
 				try {
 					var preset = JSON.parse(data)
 				}
 				catch(e) {
-					return logger.log('warn', 'error parsing preset-file', name+'.json', e);
+					return debug('error parsing preset-file', name+'.json', e);
 				}
 
 				// update state
@@ -356,7 +344,7 @@ function startWebUi()
 				for(var guestname in config.staticGuests)
 				{
 					var guest = config.staticGuests[guestname];
-					logger.log('debug', '   forwarding to "'+guestname+'": '+guest.address);
+					debug('   forwarding to "'+guestname+'": '+guest.address);
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
 
@@ -364,7 +352,7 @@ function startWebUi()
 				for(var guestname in guests)
 				{
 					var guest = guests[guestname];
-					logger.log('debug', '   forwarding to "'+guestname+'": '+guest.address);
+					debug('   forwarding to "'+guestname+'": '+guest.address);
 					esock.send(buffer, 0, buffer.length, guest.port, guest.address);
 				}
 
@@ -375,7 +363,7 @@ function startWebUi()
 		});
 
 		socket.on('removeState', function(messages) {
-			logger.log('info', 'removing', messages.length || 'all', 'of', Object.keys(state).length, 'messages from internal state');
+			debug('removing', messages.length || 'all', 'of', Object.keys(state).length, 'messages from internal state');
 
 			if(messages.length)
 			{
@@ -386,7 +374,7 @@ function startWebUi()
 			else state = [];
 
 			updateWebUi('removed message');
-			logger.log('debug', Object.keys(state).length, 'messages in internal state left');
+			debug(Object.keys(state).length, 'messages in internal state left');
 		});
 	});
 
@@ -415,12 +403,12 @@ function startLessCssRecompiler()
 
 	function recompile(lessfile, cssfile)
 	{
-		logger.log('debug', 'lesscss recompile '+lessfile+' -> '+cssfile);
+		debug('lesscss recompile '+lessfile+' -> '+cssfile);
 
 		fs.readFile(lessfile, {encoding: 'utf8'}, function(err, lesscode)
 		{
 			if(err)
-				return logger.log('error', 'lesscss error: unable to read less file ' + lessfile, err)
+				return debug('lesscss error: unable to read less file ' + lessfile, err)
 
 			less.render(
 				lesscode,
@@ -431,11 +419,11 @@ function startLessCssRecompiler()
 				},
 				function(err, csscode) {
 					if(err)
-						return logger.log('error', 'lesscss error', less.formatError(err))
+						return debug('lesscss error', less.formatError(err))
 
 					fs.writeFile(cssfile, csscode, {encoding: 'utf8'}, function(err) {
 						if(err)
-							return logger.log('error', 'unable to write css file ' + cssfile, err);
+							return debug('unable to write css file ' + cssfile, err);
 					});
 				}
 			);
@@ -495,7 +483,7 @@ function buildWebUiUpdateBundle() {
 
 function loadPresets()
 {
-	logger.log('info', 'loading presets');
+	debug('loading presets');
 	fs.readdir('presets/', function(err, files) {
 		files.forEach(function(file) {
 			path.parse
@@ -505,7 +493,7 @@ function loadPresets()
 			}
 		})
 
-		logger.log('info', 'loaded', Object.keys(presets).length,'presets');
+		debug('loaded', Object.keys(presets).length,'presets');
 	});
 }
 
@@ -526,20 +514,20 @@ function startRelay()
 		try {
 			var message = osc.fromBuffer(buffer);
 		} catch (e) {
-			return logger.log('warn', 'message parse error', e);
+			return debug('message parse error', e);
 		}
 
 		// catch bogus messages
 		if(!message.address)
-			logger.log('warn', 'received bogus message from '+rinfo.address+' (no address)');
+			debug('received bogus message from '+rinfo.address+' (no address)');
 
 		// print some message
-		logger.log('debug', 'received message from '+rinfo.address+':', message.address, 'with', (message.args ? message.args.length : 0), 'arg(s)');
+		debug('received message from '+rinfo.address+':', message.address, 'with', (message.args ? message.args.length : 0), 'arg(s)');
 
 		// test if the message matches one of the filters
 		var filterResult = isMessageFiltered(message.address);
 		if(filterResult !== false)
-			return logger.log('debug', '   filtered -> ', filterResult);
+			return debug('   filtered -> ', filterResult);
 
 		// message is new - inform WebUi
 		var isNew = !state[message.address];
@@ -553,7 +541,7 @@ function startRelay()
 		function forward(name, guest)
 		{
 			// print a message
-			logger.log('debug', '   forwarding to "'+name+'": '+guest.address);
+			debug('   forwarding to "'+name+'": '+guest.address);
 
 			// and submit the data
 			esock.send(buffer, 0, buffer.length, guest.port, guest.address);
@@ -584,7 +572,7 @@ function startRelay()
 	if(config.broadcastInterval > 0 && Object.keys(config.staticGuests).length > 0)
 	{
 		setInterval(function() {
-			logger.log('info', 'broadcasting complete internal state to static guests');
+			debug('broadcasting complete internal state to static guests');
 			var buffer = generateBundleBuffer();
 
 			// iterare static guests
