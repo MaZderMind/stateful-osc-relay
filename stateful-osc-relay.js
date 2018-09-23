@@ -15,7 +15,7 @@ var
 	osc = require('osc-min'),
 
 	// the zeroconf/multicast module
-	mdns = require('mdns'),
+	bonjour = require('bonjour')(),
 
 	// http-module for a web-gui
 	http = require('http'),
@@ -37,6 +37,10 @@ var
 
 	// logging
 	debug = require('debug')('osc-relay'),
+
+	// address classification
+	Address4 = require('ip-address').Address4,
+	Address6 = require('ip-address').Address6,
 
 	// communication port for web-clients
 	io = null,
@@ -99,8 +103,14 @@ function updateLocalAdresses()
 		interfaces[ifName].forEach(function(ifAddressInfo)
 		{
 			// collect external ipv4 adresses
-			if(ifAddressInfo.family == 'IPv4' && !ifAddressInfo.internal)
-				addresses.push({ifName: ifName, address: ifAddressInfo.address});
+			if(ifAddressInfo.internal)
+				return;
+
+			var a4 = new Address4(ifAddressInfo.address);
+			if(!a4.isValid())
+				return;
+
+			addresses.push({ifName: ifName, address: ifAddressInfo.address});
 		});
 	};
 
@@ -148,22 +158,20 @@ function advertiseService()
 	debug("Advertising our relay via Zeroconf");
 
 	// advertise our relay service
-	mdns.createAdvertisement(
-		mdns.udp('osc'),
-		config.receivePort,
-		{
-			name: 'Stateful OSC-Relay on '+os.hostname()
-		}
-	).start();
+	bonjour.publish({
+		type: 'osc',
+		protocol: 'udp',
+		port: config.receivePort,
+		name: 'Stateful OSC-Relay on '+os.hostname()
+	});
 
 	// advertise our WebUI
-	mdns.createAdvertisement(
-		mdns.tcp('http'),
-		config.webUiPort,
-		{
-			name: 'WebUI of Stateful OSC-Relay on '+os.hostname()
-		}
-	).start();
+	bonjour.publish({
+		type: 'http',
+		protocol: 'tcp',
+		port: config.webUiPort,
+		name: 'WebUI of Stateful OSC-Relay on '+os.hostname()
+	})
 }
 
 
@@ -171,13 +179,13 @@ function advertiseService()
 // start an mdns-browser, watching for osc compatible guests
 function startGuestBrowser()
 {
-	var mdnsBrowser = mdns.createBrowser(mdns.udp('osc'));
+	var browser = bonjour.find({type: 'osc', protocol: 'udp'});
 
 	// wait for ZeroConf events
 	debug('looking for new guests using ZeroConf');
 
 	// on servide up
-	mdnsBrowser.on('serviceUp', function(service)
+	browser.on('up', function(service)
 	{
 		// sometimes an andvertisement without an address comes through..
 		if(service.addresses && service.addresses.length == 0)
@@ -194,9 +202,12 @@ function startGuestBrowser()
 		// update the list of internal addresses so we don't eat our own announcement when changing ips
 		updateLocalAdresses();
 
-		// test our internal address
-		if(service.addresses.indexOf('127.0.0.1') !== -1 && service.port === config.receivePort)
-			return;
+		// test if the advertisement is our own from a lo-interface
+		if(
+			service.addresses.indexOf('127.0.0.1') !== -1 &&
+			service.addresses.indexOf('::1') &&
+			service.port === config.receivePort
+		) return;
 
 		// test all static configured guests and ignore their advertisements
 		for(var name in config.staticGuests)
@@ -216,9 +227,31 @@ function startGuestBrowser()
 			return;
 		}
 
+		// select the first non-link-local address
+		var selectedAdress = null;
+		debug('guest announced', service.addresses.length, 'addresses:', service.addresses);
+		for(var idx in service.addresses)
+		{
+			var address = service.addresses[idx];
+			debug('testing', address);
+
+			var a4 = new Address4(address);
+			if(a4.isValid()) {
+				debug('is valid v4 address, selecting');
+				selectedAdress = address;
+				break;
+			}
+		}
+
+		if(!selectedAdress)
+		{
+			debug('no valid ipv4-address found');
+			return;
+		}
+
 		// build a new guest record
 		var guest = {
-			address: service.addresses[0],
+			address: selectedAdress,
 			port: service.port,
 			lastSeen: new Date()
 		}
@@ -227,7 +260,7 @@ function startGuestBrowser()
 		guests[service.name] = guest;
 
 		// print another message
-		debug('guest "'+service.name+'" up:', service.addresses[0], service.port, '(now '+Object.keys(guests).length+' guests)');
+		debug('guest "'+service.name+'" up:', guest.address, guest.port, '(now '+Object.keys(guests).length+' guests)');
 
 		// notify the web-ui clients
 		updateWebUi('guest-up');
@@ -239,7 +272,7 @@ function startGuestBrowser()
 	});
 	
 	// on service down
-	mdnsBrowser.on('serviceDown', function(service)
+	browser.on('down', function(service)
 	{
 		// unknwon service
 		if(!guests[service.name])
@@ -257,7 +290,7 @@ function startGuestBrowser()
 	});
 
 	// start the browser
-	mdnsBrowser.start();
+	browser.start();
 }
 
 
@@ -549,12 +582,16 @@ function startRelay()
 
 		// iterare static guests
 		for(var name in config.staticGuests)
-			forward(name, staticGuests[name]);
+		{
+			if(staticGuests[name].address != rinfo.address)
+				forward(name, staticGuests[name]);
+		}
 
 		// iterare dynamic guests
 		for(var name in guests)
 		{
-			forward(name, guests[name]);
+			if(guests[name].address != rinfo.address)
+				forward(name, guests[name]);
 
 			// we have no way in determining which guest this message came from (-> random udp sending ports)
 			// but we can update the lastSeen stamp on all guests on that ip address

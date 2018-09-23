@@ -21,9 +21,10 @@
     "state"
   ],
   "dependencies": {
+    "bonjour": "^3.5.0",
     "debug": "^4.0.1",
+    "ip-address": "^5.8.9",
     "less": "^3.8.1",
-    "mdns": "^2.4.0",
     "node-static": "^0.7.10",
     "osc-min": "^1.1.1",
     "socket.io": "^2.1.1"
